@@ -1,0 +1,19 @@
+{
+  "projectName": "xpro",
+  "mode": "file-router",
+  "typescript": true,
+  "packageManager": "bun",
+  "includeExamples": false,
+  "tailwind": false,
+  "projectPreset": "blank",
+  "addOnOptions": {},
+  "git": true,
+  "install": true,
+  "intent": false,
+  "routerOnly": false,
+  "version": 1,
+  "framework": "react",
+  "chosenAddOns": [
+    "cloudflare"
+  ]
+}

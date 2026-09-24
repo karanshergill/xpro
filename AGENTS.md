@@ -18,17 +18,21 @@ bun run dev
 bun run build
 ```
 
-For local development, the current dev script is:
+This is a Bun workspaces monorepo. Apps live in `apps/`, shared packages in `packages/`.
+The root scripts run the matching script in `apps/web` (`bun --filter @xpro/web <script>`),
+whose dev script is:
 
 ```bash
 vite dev --port 3000
 ```
 
-Therefore start development with:
+Therefore start development from the repository root with:
 
 ```bash
 bun run dev
 ```
+
+The Worker name `xpro` in `apps/web/wrangler.jsonc` must not change: Durable Object data belongs to it.
 
 Do not replace Bun with npm, pnpm, or Yarn.
 

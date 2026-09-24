@@ -1,31 +1,33 @@
 # xpro
 
-A minimal TanStack Start app with one route and plain CSS.
+A multi-tenant, modular business platform on Cloudflare Workers.
+
+## Layout
+
+- `apps/web`: the main app (TanStack Start on Cloudflare Workers)
+- `packages/`: shared code (none yet)
+- `docs/`: planning and tech stack
+- `.specify/`: project constitution and Spec Kit templates
+- `specs/`: feature specifications
+
+## Develop
+
+From the repository root:
 
 ```bash
 bun install
-bun --bun run dev
+bun run dev
 ```
 
-Edit `src/routes/index.tsx` to get started. Add route files under
-`src/routes`; TanStack Router updates `src/routeTree.gen.ts` for you.
+The app runs at http://localhost:3000. Pages live in `apps/web/src/routes`; TanStack Router
+updates `apps/web/src/routeTree.gen.ts` for you.
 
-Build the production app with:
+## Build and deploy
 
 ```bash
-bun --bun run build
+bun run build
+bun run deploy
 ```
 
-## Deploy to Cloudflare Workers
-
-This project uses the Cloudflare Vite plugin (configured in `vite.config.ts`) and `wrangler.jsonc`:
-
-1. Install Wrangler: `npm install -g wrangler`
-2. Authenticate: `wrangler login`
-3. Deploy: `npx wrangler deploy`
-
-For production env vars, run `wrangler secret put MY_VAR` for each secret listed in `.env.example`. Public (non-secret) vars go in `wrangler.jsonc` under `vars`.
-
-KV, D1, R2, and Durable Object bindings are configured in `wrangler.jsonc` — see https://developers.cloudflare.com/workers/wrangler/configuration/.
-
-
+Deploying needs a Cloudflare login (`bunx wrangler login`). Bindings (D1, R2, Durable Objects)
+and plain settings go in `apps/web/wrangler.jsonc`; secrets are kept in Cloudflare Secrets Store.

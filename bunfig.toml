@@ -1,0 +1,3 @@
+# Isolated installs combined with catalogs have known bugs (oven-sh/bun#23615).
+[install]
+linker = "hoisted"

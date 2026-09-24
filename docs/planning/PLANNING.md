@@ -42,6 +42,9 @@
 - **Module split:** only heavy modules get their own database, and
   only if their data doesn't need to be saved together with another
   module's.
+- **Backups:** every database can be restored to any point in the last
+  30 days, using Cloudflare's built-in restore. Restoring is rehearsed
+  before the first real client and after every major change.
 
 ## App layout
 
@@ -71,6 +74,9 @@
   Object and against an external database.
 - **Releases:** new code is released workspace by workspace, in an order
   xpro chooses. New features are switched on gradually with feature flags.
+- **Versions:** every workspace app reports the exact code version it
+  runs, and STMS records it, so xpro always knows which version each
+  workspace is on.
 - **Start:** development runs locally and on Cloudflare's free plan.
   Workers for Platforms is switched on before the first real client.
 
@@ -111,3 +117,38 @@
   in teams.
 - **Entities:** each user is given the companies and branches they
   can work in, and can switch between them.
+
+## Core: Audit log
+
+- **What:** every important action in a workspace is recorded: who did
+  it (a person or an automatic job), what was done, and exactly when.
+- **Tamper-proof:** entries can only be added, never changed or deleted,
+  not even by admins.
+- **Where:** each workspace's audit log is kept inside that workspace's
+  own storage.
+- **What counts as important:** decided for each module when it is
+  planned.
+
+## Core: Unusual activity
+
+- **Bulk limits:** unusually large actions, such as exporting all
+  customers at once or deleting many records, are slowed down or
+  blocked, even for users who are allowed to see that data.
+- **Normal work unaffected:** limits are set for each module from what
+  normal work looks like, when the module is planned.
+- **Adjustable:** xpro sets the default limits; a workspace's admins can
+  change them for their own workspace.
+- **Recorded:** every slowed or blocked action is written to the audit
+  log.
+
+## Health checks
+
+- **Status page:** every workspace app, the router and the platform app
+  have a status address that checks their parts (database, storage,
+  email) and reports OK, WARN or ERROR.
+- **Quick check:** a lighter address that only says whether the app can
+  serve requests, for monitoring tools to check often.
+- **Protected:** status addresses need a monitoring key, so they never
+  show details to the public.
+- **Alerts:** xpro is alerted when any app reports ERROR. The alerting
+  tool is chosen with the tech stack.

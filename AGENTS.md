@@ -58,11 +58,35 @@ Before running or suggesting project commands, inspect the existing `package.jso
 - Write error handling only for failures that can realistically occur.
 - Write tests for observable behavior, not implementation details.
 - Do not keep temporary tests created only to prove a fix or removal unless they protect meaningful behavior.
+- Non-trivial logic (branches, loops, parsing, money and security paths) must leave at least one
+  test that fails if the logic breaks. Trivial code needs no test.
+- Fix bugs at the root cause, not the symptom: find every caller of the code being changed and fix
+  the shared code once, rather than patching only the caller in which the problem appeared.
+- When two solutions are equally simple, choose the one that handles edge cases correctly, not the
+  shorter or more familiar one.
+- Mark every deliberate shortcut with a `shortcut:` comment stating its limit and when to upgrade
+  it. A shortcut comment without an upgrade trigger is not allowed. Review the list of shortcut
+  comments before each release.
+
+Before writing code, understand the problem first: read the task and every piece of code it
+touches, and trace the real flow end to end. Then stop at the first step that holds:
+
+1. Does this need to exist at all? If not, do not build it.
+2. Does the codebase already have it? Reuse it.
+3. Does the platform or standard library cover it? Use it.
+4. Does an already-approved dependency cover it? Use it.
+5. Does a proven dependency cover it? Add it only after checking its official docs and
+   Cloudflare Workers compatibility.
+6. Only then: write the minimum custom code that works.
 
 After confirming changes work, review them and:
 
 - Remove dead, speculative, or unnecessary code.
+- Replace hand-built code that the platform, standard library, or an approved dependency already
+  provides.
 - Improve unclear names.
-- Collapse abstractions that provide no benefit.
+- Collapse abstractions that provide no benefit: an interface with one implementation, a factory
+  that builds one thing, a setting nobody changes, a wrapper that only passes calls through.
+  Planned extension points are the exception.
 - Split code that mixes unrelated responsibilities.
 - Simplify conditionals and data flow.

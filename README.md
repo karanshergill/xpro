@@ -7,7 +7,8 @@ A multi-tenant, modular business platform on Cloudflare Workers.
 - `apps/web`: the main app (TanStack Start on Cloudflare Workers)
 - `packages/`: shared code (none yet)
 - `docs/`: planning and tech stack
-- `.specify/`: project constitution and Spec Kit templates
+- `.specify/memory/constitution.md`: the project constitution, the permanent rules everything follows
+- `.specify/`: Spec Kit templates and scripts
 - `specs/`: feature specifications
 
 ## Develop

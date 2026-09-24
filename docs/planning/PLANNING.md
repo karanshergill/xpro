@@ -2,7 +2,7 @@
 
 ## Tenants
 
-- **Account:** the tenant. A person's login to the Portal. An account can
+- **Account:** the tenant. A person who signs up with xpro. An account can
   own several workspaces.
 - **Workspace:** what it is for is up to the account holder.
 - **Billing:** each workspace has its own subscription and is billed
@@ -12,16 +12,21 @@
   in one place. Everything else about a person, such as their roles,
   teams and entities, stays inside each workspace.
 
-## Portal
+## xpro's own workspace
 
-- **Purpose:** where xpro manages its tenants. It lives outside the
-  workspaces.
-- **Accounts:** sign-up and management of accounts.
-- **Workspaces:** create, name, copy, delete.
-- **Modules:** picking which modules each workspace gets.
-- **Subscriptions and billing:** plans, payments, invoices.
-- **Portal users:** xpro's own users. For now, only one master
-  user with complete access.
+- **Purpose:** xpro runs its own business in its own workspace, created at
+  setup, like any other workspace.
+- **xpro's team:** internal users of that workspace. The master user is its
+  first admin, with complete access.
+- **Account holders:** external users of xpro's workspace. They see only
+  their own workspaces, subscriptions and invoices.
+- **SaaS Tenant Management System (STMS):** a module installed only in
+  xpro's workspace. It handles sign-up, accounts, workspaces (create, name,
+  copy, delete), picking modules, and subscriptions and billing.
+- **Special power:** only STMS can create, change or suspend other
+  workspaces, and only from inside xpro's workspace.
+- **Portal:** the area where external users of any workspace see their own
+  records. Account holders use xpro's Portal.
 
 ## Data storage
 
@@ -40,29 +45,34 @@
 
 ## App layout
 
-- **Shared app:** one app that serves all standard workspaces. Each
-  workspace's data sits in its own Durable Object, owned by the
-  shared app.
-- **Dedicated app:** a workspace's own copy of the app, for tenants
-  who need custom code, a fixed version, or stronger separation. Its
-  data sits in its own Durable Object, owned by that app. Runs on
-  Cloudflare Workers for Platforms.
-- **One codebase:** the shared app and dedicated apps run the same
-  code; only their settings differ.
-- **Router:** one front router sends each workspace's visitors to the
-  shared app or to its dedicated app. Addresses never change.
-- **Placement record:** the Portal records which app serves each
-  workspace and where its data is stored.
+- **One app per workspace:** every workspace, including xpro's own, runs
+  in its own copy of the app on Cloudflare Workers for Platforms. Its data
+  sits in its own Durable Object, owned by that app.
+- **One codebase:** all workspace apps run the same code; only their
+  settings differ.
+- **Separation:** workspace apps run in Cloudflare's isolated mode, so
+  their caches never mix.
+- **Router:** one front router sends each visitor to the right workspace
+  app, and passes on request details the app needs, such as country and
+  time zone. Addresses never change.
+- **Placement record:** STMS records each workspace's app, addresses and
+  where its data is stored, in the shared database. The router reads a
+  fast copy of it. Default and custom addresses use the same record.
+- **Platform app:** a separate app runs work that spans workspaces, such
+  as setting up a workspace, releases, billing runs and backups.
+- **Workspace jobs:** long jobs inside one workspace, such as imports,
+  reports and recurring invoices, run step by step inside its Durable
+  Object.
 - **Custom work:** no-code changes (fields, forms, workflows) work in
-  every app. Real custom code goes only into dedicated apps.
-- **External databases:** a workspace on an external database can be
-  served by the shared app or a dedicated app.
-- **Moving between apps:** moving a workspace between the shared app
-  and a dedicated app is a planned data move (export and import).
+  every workspace. Real custom code goes only into that workspace's app.
+- **External databases:** a workspace's data can move to an external
+  database; the connection is a setting of that workspace.
 - **Business logic:** written once, and runs both inside a Durable
   Object and against an external database.
-- **Start:** shared app only. Workers for Platforms is added when the
-  first tenant needs a dedicated app.
+- **Releases:** new code is released workspace by workspace, in an order
+  xpro chooses. New features are switched on gradually with feature flags.
+- **Start:** development runs locally and on Cloudflare's free plan.
+  Workers for Platforms is switched on before the first real client.
 
 ## Web addresses
 
@@ -70,13 +80,24 @@
   if its data is split across several databases.
 - **Custom address:** on paid plans, customers can use their own
   address (e.g. `erp.acme.com`).
-- **Portal address:** the Portal has its own address.
-- **Domain:** not chosen yet.
+- **xpro's address:** xpro's own workspace, with sign-up and the Portal,
+  has its own address.
+- **Sign-in:** everyone signs in on one central sign-in page at xpro's
+  address. Visitors to a custom address are sent there and back
+  automatically.
+- **Domain:** not chosen yet. It must be chosen, and managed in
+  Cloudflare, before the first real client.
+- **Email:** sent from a subdomain of xpro's domain, not the main domain,
+  so email problems never affect the website.
 
 ## Core: Workspace users
 
-- **Workspace users:** the tenant's people inside a workspace.
-  Separate from accounts and portal users.
+- **Workspace users:** the people inside a workspace, internal or
+  external. A person can be a user in several workspaces with one login.
+- **Choosing a workspace:** people arriving at a workspace's address go
+  straight to it after signing in. Others see the list of their
+  workspaces and pick one; with only one, they go straight in. Signed-in
+  users can switch workspaces without signing in again.
 - **Internal users:** the tenant's staff, who use the modules.
 - **External users:** the tenant's customers and suppliers, who see
   only their own records.

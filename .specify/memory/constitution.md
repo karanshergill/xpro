@@ -11,7 +11,7 @@
 
 ### II. Runs Anywhere
 
-- **One codebase:** the shared app and dedicated apps run the same code; only settings differ.
+- **One codebase:** all workspace apps run the same code; only settings differ.
 - **Location-independent:** business logic MUST be written once and run both inside a Durable
   Object and against an external database (PostgreSQL or MySQL).
 - **One way to reach data:** all database access goes through Kysely. No code may depend on
@@ -40,6 +40,8 @@
 - **Proven over custom:** use well-known libraries instead of building our own.
 - **Abstractions:** add them only for stable ideas. Some repetition beats a wrong abstraction.
 - **Errors:** handle only failures that can really happen.
+- **Never simplified away:** input checks at trust boundaries, error handling that prevents data
+  loss, security and accessibility.
 - **Clean-up:** after a change works, remove dead code, fix unclear names and simplify.
 
 ### VI. Tested Behaviour
@@ -51,11 +53,13 @@
 
 ## Architecture Rules
 
-- **Portal:** lives outside the workspaces and manages accounts, workspaces, modules and billing.
-- **Shared and dedicated apps:** standard workspaces use the shared app. Dedicated apps
-  (Workers for Platforms) are for custom code, a fixed version or stronger separation.
-- **Custom code:** real custom code goes only into dedicated apps. No-code changes (fields,
-  forms, workflows) work everywhere.
+- **xpro's own workspace:** xpro runs its business in its own workspace. Accounts, workspaces,
+  modules and billing are managed by STMS, a module installed only there. Only STMS can create,
+  change or suspend other workspaces.
+- **One app per workspace:** every workspace runs in its own app on Workers for Platforms, in
+  Cloudflare's isolated mode.
+- **Custom code:** real custom code goes only into the app of the workspace it was built for.
+  No-code changes (fields, forms, workflows) work everywhere.
 - **Custom code authors:** only the xpro team writes code that runs inside xpro. Tenants use
   public APIs.
 - **Module split:** only heavy modules get their own database, and only when their data never
@@ -66,6 +70,8 @@
 - **Plan before code:** nothing is built until it is planned and approved.
 - **Approval:** no text goes into planning documents without the product owner's approval,
   one section at a time.
+- **Diffs first:** every change to an existing project file is shown as a diff and approved
+  before it is written.
 - **Feature steps:** specify → clarify if needed → plan → tasks → implement → converge.
 - **Plain language:** planning documents use short bullets in the form "**Term:** meaning".
 - **References:** outside products used as inspiration are not named in project documents.
@@ -80,4 +86,4 @@
 - **Checks:** every plan and review MUST confirm it follows these rules. Any exception MUST
   be written down with its reason.
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-24 | **Last Amended**: 2026-09-24
+**Version**: 2.0.0 | **Ratified**: 2026-09-24 | **Last Amended**: 2026-09-25

@@ -59,8 +59,6 @@
 
 ## Operations
 - Cloudflare Workers Logs (errors and logs)
-- Sentry (error alerts from server and browser, and the uptime check; user
-  details turned off)
 - Cloudflare built-in 30-day restore (backups for D1 and Durable Objects)
 - Cloudflare Flagship (feature flags, beta)
 - Environments: local, test, live; every change must pass on the Cloudflare test environment
@@ -91,5 +89,7 @@
 ## Later
 - Cloudflare Hyperdrive (external databases for large workspaces)
 - Mobile number with OTP, and Google login
+- Sentry (error and uptime alerts; free plan; set up before the first real
+  client)
 - UI component kit on top of Tailwind (to decide)
 - k6 (load testing; confirm before the first real client)

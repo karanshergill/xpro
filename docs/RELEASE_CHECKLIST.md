@@ -31,3 +31,4 @@
 - [ ] Logs are searchable, and errors can be traced to the code.
 - [ ] An incident playbook is written and rehearsed: who is contacted, how
       damage is contained, and how data is restored.
+- [ ] Error and uptime alerts are set up.

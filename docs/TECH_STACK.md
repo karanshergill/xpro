@@ -12,6 +12,7 @@
   paging done on the server)
 - Valibot
 - Vite
+- Tailwind CSS v4 (styling, through its Vite plugin)
 - react-image-crop (profile picture cropping)
 - Paraglide JS (translations)
 - barcode-detector (camera barcode scanning; its scanner file is served from
@@ -82,11 +83,13 @@
 - dependency-cruiser (import rules; blocks merges)
 - eslint-plugin-boundaries (import rules in the editor, through Oxlint)
 - knip (unused code and packages)
+- design-lint (@evilmartians/design-lint; Tailwind colour and design-token rules,
+  exact version pinned)
 - GitHub Actions (checks and deploys)
 - Dependabot
 
 ## Later
 - Cloudflare Hyperdrive (external databases for large workspaces)
 - Mobile number with OTP, and Google login
-- UI kit (to decide)
+- UI component kit on top of Tailwind (to decide)
 - k6 (load testing; confirm before the first real client)

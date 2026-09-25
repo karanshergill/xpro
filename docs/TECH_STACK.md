@@ -8,8 +8,25 @@
 - TanStack Query
 - TanStack Form
 - TanStack Store
+- TanStack Table v9 and TanStack Virtual (data tables; sorting, filtering and
+  paging done on the server)
 - Valibot
 - Vite
+- react-image-crop (profile picture cropping)
+- Paraglide JS (translations)
+- barcode-detector (camera barcode scanning; its scanner file is served from
+  our own address)
+
+## Shared libraries
+- true-myth (named results for expected business outcomes)
+- uuid (IDs: UUID v7)
+- Dinero.js v2 (money) and big.js (other exact decimals)
+- temporal-polyfill (dates and time zones; always imported from
+  `temporal-polyfill/implementation`)
+- libphonenumber-js (phone numbers; strict checks on the server)
+- Papa Parse (CSV; formula escaping always on for exports)
+- read-excel-file and write-excel-file (Excel .xlsx files)
+- bwip-js (barcode and QR code images)
 
 ## Backend
 - TypeScript
@@ -18,7 +35,8 @@
 - Better Auth (email and password; native scrypt for password hashing)
 - AccessControl v3 (to confirm when planning Access control)
 - Cloudflare D1 (shared login details and the placement record)
-- Kysely
+- Kysely (kysely-durable-objects for Durable Objects, exact version pinned;
+  kysely-d1 for D1; built-in Migrator for migrations)
 - Cloudflare R2
 - Cloudflare Queues
 - Durable Objects (one per workspace; alarms for long workspace jobs)
@@ -36,9 +54,12 @@
 
 ## Email
 - Cloudflare Email Service (beta; sent from a subdomain of xpro's domain)
+- React Email (email templates)
 
 ## Operations
 - Cloudflare Workers Logs (errors and logs)
+- Sentry (error alerts from server and browser, and the uptime check; user
+  details turned off)
 - Cloudflare built-in 30-day restore (backups for D1 and Durable Objects)
 - Cloudflare Flagship (feature flags, beta)
 - Environments: local, test, live; every change must pass on the Cloudflare test environment
@@ -50,13 +71,22 @@
 - Wrangler
 - Cloudflare Vite Plugin
 - Vitest
-- Cloudflare Vitest Plugin
+- Cloudflare Vitest Plugin (@cloudflare/vitest-plugin; tests run inside the
+  Workers runtime)
+- MSW for Cloudflare (@msw/cloudflare; stands in for outside services in tests)
 - Playwright
 - Oxlint
+- oxlint-tsgolint (type-aware lint rules)
 - Oxfmt
+- lefthook (checks before commit and before push)
+- dependency-cruiser (import rules; blocks merges)
+- eslint-plugin-boundaries (import rules in the editor, through Oxlint)
+- knip (unused code and packages)
 - GitHub Actions (checks and deploys)
 - Dependabot
 
 ## Later
 - Cloudflare Hyperdrive (external databases for large workspaces)
 - Mobile number with OTP, and Google login
+- UI kit (to decide)
+- k6 (load testing; confirm before the first real client)

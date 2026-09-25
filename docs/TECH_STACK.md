@@ -25,8 +25,8 @@
 - temporal-polyfill (dates and time zones; always imported from
   `temporal-polyfill/implementation`)
 - libphonenumber-js (phone numbers; strict checks on the server)
-- Papa Parse (CSV; formula escaping always on for exports)
-- read-excel-file and write-excel-file (Excel .xlsx files)
+- hucre (CSV and Excel files; formula escaping always on for exports; exact
+  version pinned)
 - bwip-js (barcode and QR code images)
 
 ## Backend

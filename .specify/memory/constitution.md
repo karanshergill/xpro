@@ -72,6 +72,8 @@
   one section at a time.
 - **Diffs first:** every change to an existing project file is shown as a diff and approved
   before it is written.
+- **Decision records:** every decision with real alternatives gets a short record in
+  `docs/adr/`: the problem, the decision, the rejected options and the impact.
 - **Feature steps:** specify → clarify if needed → plan → tasks → implement → converge.
 - **Plain language:** planning documents use short bullets in the form "**Term:** meaning".
 - **References:** outside products used as inspiration are not named in project documents.
@@ -86,4 +88,4 @@
 - **Checks:** every plan and review MUST confirm it follows these rules. Any exception MUST
   be written down with its reason.
 
-**Version**: 2.0.0 | **Ratified**: 2026-09-24 | **Last Amended**: 2026-09-25
+**Version**: 2.1.0 | **Ratified**: 2026-09-24 | **Last Amended**: 2026-09-25

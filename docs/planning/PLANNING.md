@@ -228,7 +228,7 @@
 - **STMS:** a module like any other, installed only in xpro's own
   workspace.
 - **Sites:** physical places such as plants and warehouses are not part of
-  core. They come with the Inventory module.
+  core. They come with the ERP module.
 - **Module boundaries:** a module's internals are private. Other modules
   use only its public interface, or react to its events. They never
   reach into its files.

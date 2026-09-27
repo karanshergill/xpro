@@ -15,6 +15,8 @@ database and screens. Add a term here before using it.
   customer or supplier, who sees only their own records in the Portal.
 - **Internal user:** a workspace user on the tenant's staff, who uses the
   modules.
+- **Login:** a person's one email or username and password, shared by all
+  their workspaces.
 - **Master user:** the first admin of xpro's own workspace, with complete
   access.
 - **Module:** a self-contained part of the app for one business area,

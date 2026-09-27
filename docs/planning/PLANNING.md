@@ -61,11 +61,39 @@
 - **Placement record:** STMS records each workspace's app, addresses and
   where its data is stored, in the shared database. The router reads a
   fast copy of it. Default and custom addresses use the same record.
+- **Workspace location:** a workspace's data stays where it is first
+  created. STMS picks the location from the client's region when the
+  workspace is created, and records it in the placement record.
+- **Workspace identity:** each workspace stores its own ID when it is
+  created. Every call to it carries that ID, and a call with a different
+  ID is refused.
+- **Removing a workspace:** when a workspace is deleted, all of its
+  stored data is wiped in one step, including its scheduled jobs.
 - **Platform app:** a separate app runs work that spans workspaces, such
   as setting up a workspace, releases, billing runs and backups.
+- **No hand edits:** live data is never edited by hand. One-off fixes are
+  saved scripts, run through the platform app with the same code and
+  settings as the apps, and recorded in the audit log.
 - **Workspace jobs:** long jobs inside one workspace, such as imports,
   reports and recurring invoices, run step by step inside its Durable
   Object.
+- **One job runner:** each workspace has one job runner. It owns the
+  workspace's only timer and schedules all its jobs, including sending
+  outgoing messages.
+- **Wakes only for work:** the runner sets its timer only when a job is
+  due, never on a short repeating schedule.
+- **Progress saved as it goes:** a long job saves its progress after each
+  step, so it carries on where it stopped if the workspace restarts.
+- **Long jobs split:** no step runs longer than Cloudflare allows (15
+  minutes). Bigger jobs are split into steps.
+- **Failures:** a job that fails for a temporary reason is retried later,
+  waiting longer each time. One that fails for a permanent reason stops
+  at once and is reported. The runner reschedules itself before
+  Cloudflare's own retries run out.
+- **Safe to repeat:** every job step gives the same result if it runs
+  twice.
+- **Clean-up:** records kept only for a while, such as the keys used for
+  safe retries, are deleted by a regular clean-up job.
 - **Custom work:** no-code changes (fields, forms, workflows) work in
   every workspace. Real custom code goes only into that workspace's app.
 - **External databases:** a workspace's data can move to an external
@@ -128,6 +156,20 @@
   own storage.
 - **What counts as important:** decided for each module when it is
   planned.
+- **Action details:** every action and event records who triggered it
+  (a person or an automatic job), when, the request it belongs to, and
+  which earlier action caused it. The audit log is written from these
+  details.
+- **Blocked in the database:** the database itself refuses to change or
+  delete audit entries.
+- **Chained:** each entry stores a fingerprint of the one before it, so a
+  changed or removed entry breaks the chain.
+- **Daily outside proof:** once a day, each workspace's latest
+  fingerprint is sent to an independent public timestamp service, which
+  proves it existed at that time. xpro cannot alter that record, so even
+  a change by xpro's own team would be caught.
+- **Checked:** a regular job re-checks every chain and alerts xpro if one
+  is broken. Workspace admins can run the check themselves.
 
 ## Core: Unusual activity
 
@@ -140,6 +182,96 @@
   change them for their own workspace.
 - **Recorded:** every slowed or blocked action is written to the audit
   log.
+
+## Core: Document numbers
+
+- **Readable numbers:** documents such as invoices, orders and dispatch
+  notes get a readable number, separate from their internal ID.
+- **Series:** each document type has its own number series for each
+  company or branch.
+- **Pattern:** workspace admins set each series' pattern, such as a
+  prefix, the year and the running number.
+- **Yearly restart:** a series can restart at 1 each financial year. The
+  month the financial year starts is a workspace setting.
+- **No gaps:** a number is given only in the same all-or-nothing save
+  that creates the document, so a failed save never uses up a number.
+  Cancelled documents keep their number and are never deleted. Numbers
+  are never reused.
+
+## Core: Search
+
+- **Searchable fields:** each module chooses which fields of its records
+  can be searched, such as names, codes and numbers.
+- **Search index:** searchable text is copied into a search index in the
+  workspace's own database, updated in the same all-or-nothing save as
+  the record, so results are never out of date.
+- **Part of a word:** typing part of a name or code finds it, ignoring
+  capital letters and accents.
+- **Three characters:** a search needs at least three characters.
+  Shorter searches only match exact codes.
+- **Only what you may see:** results only include records the user is
+  allowed to see.
+- **External databases:** workspaces on an external database use that
+  database's own search. The difference stays inside the data layer.
+
+## Modules
+
+- **Module:** a self-contained part of the app for one business area, with
+  its own screens, data and rules.
+- **Core:** installed in every workspace. It holds what all modules need:
+  workspace users, teams, entities, the audit log and unusual-activity
+  limits.
+- **Planned modules:** CRM (customer relationships), ERP, Lead (lead
+  management), Production, Quality and Dispatch. The list will grow.
+- **Picking modules:** each workspace uses any combination of modules,
+  chosen through STMS.
+- **STMS:** a module like any other, installed only in xpro's own
+  workspace.
+- **Sites:** physical places such as plants and warehouses are not part of
+  core. They come with the Inventory module.
+- **Module boundaries:** a module's internals are private. Other modules
+  use only its public interface, or react to its events. They never
+  reach into its files.
+- **Changes and lookups:** actions that change data go through the
+  module's business rules and are saved all-or-nothing. Lists and
+  reports read the database directly, without the business rules, and
+  never change data.
+- **Events:** when something happens in a module, other modules can react
+  to it. Their reactions are saved in the same all-or-nothing save.
+- **Multi-step processes:** a process with many steps is coordinated in
+  one place, not by a long chain of events reacting to each other.
+- **Business rules stay with the data:** each record enforces its own
+  rules, so it can never be saved in an invalid state. Records that must
+  stay consistent with each other are changed and saved together, as one
+  unit.
+- **Dependencies:** a module lists the modules it needs. Adding it adds
+  them too, and a module can't be removed while another module needs it.
+- **Extension points:** a module can add fields, screens, rules and
+  reactions to another module only through the extension points that
+  module offers. It never edits the other module's code.
+- **Client custom modules:** custom work for one client is a separate
+  module that extends the standard modules the same way. It is included
+  only in that client's app.
+- **Adding a module:** its database tables are created by its own
+  database upgrades when it is added to a workspace.
+- **Removing a module:** its screens disappear but its data is kept, so
+  history stays intact and the module can be added back later.
+- **Outgoing messages:** emails, webhooks and messages to other systems
+  are first saved together with the change that caused them, then sent
+  afterwards. Nothing is sent for a change that failed to save, and a
+  message that fails to send is retried, not lost.
+- **Custom fields:** workspace admins can add their own fields to
+  records. Each field's name, label, type and rules are stored as
+  workspace data.
+- **Stored with the record:** a record's custom values are kept together
+  in one checked data field on the record, so every workspace keeps the
+  same tables.
+- **Same rules as built-in fields:** custom values are checked against
+  their field's rules on every save. Money and exact numbers follow the
+  same storage rules as built-in fields.
+- **Filter and search:** a custom field that needs filtering or sorting
+  gets its own index, and one marked searchable is added to the search
+  index.
 
 ## Health checks
 

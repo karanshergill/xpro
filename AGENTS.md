@@ -90,3 +90,20 @@ After confirming changes work, review them and:
   Planned extension points are the exception.
 - Split code that mixes unrelated responsibilities.
 - Simplify conditionals and data flow.
+
+## Conventions
+
+Detailed coding rules live in `docs/conventions/`. Read the file for the
+area you are working in:
+
+- `general.md`: naming, functions, types, comments and errors. Always.
+- `architecture.md`: where code lives and which imports are allowed. Always.
+- `database.md`: tables, queries, saves and database upgrades
+  (`*.db.ts`, migrations).
+- `server.md`: server functions, errors, logs, outside calls and Workers
+  traps (`*.server.ts`).
+- `testing.md`: what to test and how (`*.test.ts`, e2e).
+- `screens.md`: components, tables, forms, text, loading and
+  accessibility (`*.tsx`, `*.css`).
+- `dependencies.md`: adding, pinning and updating packages
+  (`package.json`, lockfile, GitHub Actions).

@@ -10,6 +10,8 @@ How code is organised. Applies to all code.
   package in `packages/`. An app includes only the modules its
   workspace uses, and a client's custom modules only in that client's
   app.
+- **Package names:** every package is named `@xpro/` followed by its
+  name in kebab-case, and a module's package uses the module's name.
 - **Public interface only:** a module package exports only its public
   interface. Other code imports the package by its name, never files
   inside it.

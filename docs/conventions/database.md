@@ -25,6 +25,8 @@ Applies to code that reads or writes a database.
   database constraints, not only checks in code.
 - **Named checks:** every value check has a clear name, so its error can
   be turned into a proper message for the user.
+- **Index and check names:** index and check names start with their
+  table's name, so an error points straight to the table.
 - **Indexed links:** every column pointing to another record has its own
   index, because SQLite does not add one.
 - **No cascade deletes:** deleting a record that others point to fails.
@@ -87,6 +89,9 @@ Applies to code that reads or writes a database.
 ## Database upgrades
 
 - **Kysely migrations:** every schema change is a Kysely migration.
+- **Upgrade file names:** each upgrade file name starts with the date and
+  time it was written, year first, because upgrades run in name order
+  and Kysely refuses one that sorts before an upgrade already run.
 - **Forward only:** upgrades are never undone or edited once released. A
   mistake is fixed by a new upgrade, because SQLite cannot roll back a
   schema change halfway.

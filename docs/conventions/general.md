@@ -21,6 +21,20 @@ Rules that a tool checks say so.
   never in all capitals, so names read the same everywhere.
 - **Capital-letter names:** all-capitals names are used only for exported
   values that never change.
+- **Letter case:** variables and functions use camelCase; types, classes
+  and components use PascalCase; file and folder names use kebab-case,
+  except where the router requires its own file names.
+- **Verbs and nouns:** functions start with a verb; values and records
+  are nouns; lists and collections use plural names.
+- **True/false prefixes:** true/false names start with is, has, can or
+  should.
+- **Events in the past tense:** events are named for what already
+  happened, in the past tense.
+- **Stored codes:** codes that are saved or sent outside the app, such as
+  statuses, event names, error codes, permission names and audit
+  actions, are lower-case with underscores and start with their module's
+  name. They are never renamed once released, because saved data and
+  other systems still use the old name.
 
 ## Functions
 

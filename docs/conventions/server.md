@@ -23,6 +23,9 @@ and Durable Objects.
   exposed by accident.
 - **API versions:** the public API carries a version number in its
   address. Breaking changes go into a new version.
+- **API names:** public API addresses are lower-case with dashes and use
+  plural nouns for collections. Field names in requests and responses
+  are camelCase.
 
 ## Errors, request IDs and logs
 
@@ -89,6 +92,11 @@ and Durable Objects.
 - **All or nothing:** an optional integration is either fully set up or
   off. Some of its settings but not all is an error that names the
   missing ones.
+- **Setting names:** settings and secrets are named in capitals with
+  underscores.
+- **Cloudflare resource names:** storage buckets, queues, databases and
+  other Cloudflare resources are lower-case with dashes and start with
+  `xpro-`. The Worker name `xpro` never changes.
 
 ## Uploads
 

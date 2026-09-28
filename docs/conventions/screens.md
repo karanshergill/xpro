@@ -27,6 +27,11 @@ Applies to what users see: pages, components and styles.
   be clicked.
 - **Prop names keep their meaning:** components never reuse `className`
   or `style` for anything other than their usual meaning.
+- **Hook names:** hooks start with `use`, as React requires. Checked by
+  the linter.
+- **Event names on components:** props that react to something start
+  with `on`, and the functions that handle them start with `handle`.
+- **Page addresses:** page addresses are lower-case with dashes.
 
 ## Tables and lists
 
@@ -83,6 +88,8 @@ Applies to what users see: pages, components and styles.
 - **Translated text:** every piece of text users see comes from the
   translation files. Labels that clients create themselves, such as
   custom field names, are workspace data, not translations.
+- **Translation keys:** translation keys are grouped by module, then by
+  screen, so each module's text can be found and translated together.
 - **Room to grow:** leave room for text to grow when translated; never
   fix a width that only fits one language.
 - **Languages by name:** show languages by their own name, never by a

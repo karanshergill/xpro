@@ -2,8 +2,10 @@
 
 ## Tenants
 
-- **Account:** the tenant. A person who signs up with xpro. An account can
-  own several workspaces.
+- **Account:** the tenant: whoever signs up with xpro. An account owns
+  one workspace for now; several come later. Everyone else in a
+  workspace belongs to it as a workspace user, with their own login, and
+  owns nothing.
 - **Workspace:** what it is for is up to the account holder.
 - **Billing:** each workspace has its own subscription and is billed
   separately.
@@ -12,21 +14,27 @@
   in one place. Everything else about a person, such as their roles,
   teams and entities, stays inside each workspace.
 
+## Hub
+
+- **Purpose:** a separate app, at its own address, that serves every
+  workspace.
+- **Sign-in and my account:** sign-up, the central sign-in page, and each
+  person's profile and password.
+- **Account admin:** account holders manage their account, workspaces and
+  subscriptions here.
+- **SaaS Tenant Management System (STMS):** xpro's team manages logins,
+  accounts, workspaces (create, name, copy, delete), picking modules, and
+  subscriptions and billing. The master user is its first admin, with
+  complete access.
+- **Special power:** only STMS can create, change or suspend workspaces.
+- **One app for now:** these areas share one app. They are split, and
+  STMS isolated, when the business grows.
+
 ## xpro's own workspace
 
-- **Purpose:** xpro runs its own business in its own workspace, created at
-  setup, like any other workspace.
-- **xpro's team:** internal users of that workspace. The master user is its
-  first admin, with complete access.
-- **Account holders:** external users of xpro's workspace. They see only
-  their own workspaces, subscriptions and invoices.
-- **SaaS Tenant Management System (STMS):** a module installed only in
-  xpro's workspace. It handles sign-up, accounts, workspaces (create, name,
-  copy, delete), picking modules, and subscriptions and billing.
-- **Special power:** only STMS can create, change or suspend other
-  workspaces, and only from inside xpro's workspace.
-- **Portal:** the area where external users of any workspace see their own
-  records. Account holders use xpro's Portal.
+- **Purpose:** an ordinary workspace for xpro's business, created when
+  xpro starts using its own modules. It has no special powers, and
+  account holders are not its users.
 
 ## Data storage
 
@@ -114,9 +122,8 @@
   if its data is split across several databases.
 - **Custom address:** on paid plans, customers can use their own
   address (e.g. `erp.acme.com`).
-- **xpro's address:** xpro's own workspace, with sign-up and the Portal,
-  has its own address.
-- **Sign-in:** everyone signs in on one central sign-in page at xpro's
+- **Hub's address:** the Hub has its own address on xpro's domain.
+- **Sign-in:** everyone signs in on one central sign-in page at the Hub's
   address. Visitors to a custom address are sent there and back
   automatically.
 - **Domain:** not chosen yet. It must be chosen, and managed in
@@ -127,14 +134,14 @@
 ## Core: Workspace users
 
 - **Workspace users:** the people inside a workspace, internal or
-  external. A person can be a user in several workspaces with one login.
-- **Choosing a workspace:** people arriving at a workspace's address go
-  straight to it after signing in. Others see the list of their
-  workspaces and pick one; with only one, they go straight in. Signed-in
-  users can switch workspaces without signing in again.
+  external.
+- **One workspace for now:** a person belongs to at most one workspace,
+  and goes straight into it after signing in. People without a workspace
+  go to their account page in the Hub. Belonging to several workspaces
+  comes later.
 - **Internal users:** the tenant's staff, who use the modules.
 - **External users:** the tenant's customers and suppliers, who see
-  only their own records.
+  only their own records, in the workspace's Portal.
 - **First admin:** the account holder who creates a workspace
   becomes its first admin.
 - **Archiving:** users are archived, never deleted, so history stays
@@ -154,6 +161,9 @@
   not even by admins.
 - **Where:** each workspace's audit log is kept inside that workspace's
   own storage.
+- **Hub:** the Hub keeps its own audit log, under the same rules, for
+  sign-ins and every action by xpro's team in STMS. Only xpro's team can
+  read it.
 - **What counts as important:** decided for each module when it is
   planned.
 - **Action details:** every action and event records who triggered it
@@ -225,8 +235,10 @@
   management), Production, Quality and Dispatch. The list will grow.
 - **Picking modules:** each workspace uses any combination of modules,
   chosen through STMS.
-- **STMS:** a module like any other, installed only in xpro's own
-  workspace.
+- **STMS:** a module package. The Hub uses it, together with the special
+  power to create, change and suspend workspaces. The same module can be
+  offered to a client's workspace to manage their own customers and
+  subscriptions, without that power.
 - **Sites:** physical places such as plants and warehouses are not part of
   core. They come with the ERP module.
 - **Module boundaries:** a module's internals are private. Other modules

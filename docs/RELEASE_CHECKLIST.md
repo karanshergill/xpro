@@ -11,8 +11,9 @@
       database is upgraded before the release, so a rollback always puts old
       code on new data.
 - [ ] The previous version to roll back to is known.
-- [ ] The release order is set: xpro's own workspace first, then a small
-      group of workspaces, then everyone.
+- [ ] The release order is set: the Hub on its own first, then xpro's own
+      workspace once it exists, then a small group of workspaces, then
+      everyone.
 - [ ] The release runs through the one deploy script, the same on a laptop
       and in CI, which accepts only a named environment.
 - [ ] New features are behind feature flags, switched off by default.

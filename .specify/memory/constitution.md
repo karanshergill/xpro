@@ -53,9 +53,9 @@
 
 ## Architecture Rules
 
-- **xpro's own workspace:** xpro runs its business in its own workspace. Accounts, workspaces,
-  modules and billing are managed by STMS, a module installed only there. Only STMS can create,
-  change or suspend other workspaces.
+- **Hub:** sign-up, sign-in, logins, accounts, billing and STMS live in the Hub, a separate app
+  that serves every workspace. Only STMS, in the Hub, can create, change or suspend workspaces.
+- **xpro's own workspace:** an ordinary workspace for xpro's business, with no special powers.
 - **One app per workspace:** every workspace runs in its own app on Workers for Platforms, in
   Cloudflare's isolated mode.
 - **Custom code:** real custom code goes only into the app of the workspace it was built for.
@@ -88,4 +88,4 @@
 - **Checks:** every plan and review MUST confirm it follows these rules. Any exception MUST
   be written down with its reason.
 
-**Version**: 2.1.0 | **Ratified**: 2026-09-24 | **Last Amended**: 2026-09-25
+**Version**: 3.0.0 | **Ratified**: 2026-09-24 | **Last Amended**: 2026-10-02

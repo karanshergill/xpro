@@ -12,21 +12,21 @@
 
 ### User Story 1 - Sign up for an account (Priority: P1)
 
-A person visits xpro's address and creates an account with an email and a password. This makes
-them an account holder: an external user of xpro's own workspace. On their first sign-in, they
-must choose a username and enter their name and phone number before they can use the Portal.
+A person visits the Hub and creates an account with an email and a password. This makes them an
+account holder. On their first sign-in, they must choose a username and enter their name and
+phone number before they can use their account page.
 
 **Why this priority**: nothing else in xpro can happen without an account.
 
 **Independent Test**: sign up with a new email, enter a username, name and phone number, and
-reach the Portal.
+reach the account page.
 
 **Acceptance Scenarios**:
 
 1. **Given** a new email, **When** the person signs up with a valid password, **Then** the
    account is created and the person is signed in.
 2. **Given** a new account, **When** the person signs in for the first time, **Then** they must
-   enter a username, name and phone number, and can't use the Portal until all three are saved.
+   enter a username, name and phone number, and can't go further until all three are saved.
 3. **Given** an email that already has an account, **When** someone signs up with it, **Then**
    sign-up is refused with the message "An account with this email already exists. Sign in
    instead?" and a link to sign in, and no account is created.
@@ -37,41 +37,38 @@ reach the Portal.
 
 ---
 
-### User Story 2 - Sign in, reach the right place and sign out (Priority: P1)
+### User Story 2 - Sign in, reach their workspace and sign out (Priority: P1)
 
 Anyone with a login (xpro's team, account holders, and the staff, customers and suppliers of
-client workspaces) signs in on xpro's one central sign-in page with their email or username and
-password. They are then sent to the right workspace, can switch between their workspaces, and
-sign out when they are done.
+client workspaces) signs in on the Hub's central sign-in page with their email or username and
+password. They are then sent to where they belong, and sign out when they are done.
 
 **Why this priority**: no one can reach any part of xpro without it.
 
-**Independent Test**: using prepared test workspaces, sign in as a person with one workspace and
-as a person with several, confirm each reaches the right place, switch workspaces, sign out, and
-confirm nothing can be reached without signing in again.
+**Independent Test**: using prepared test workspaces, sign in as an internal user, as an
+external user and as an account holder without a workspace, confirm each reaches their
+workspace's app, its Portal or their account page, sign out, and confirm nothing can be reached
+without signing in again.
 
 **Acceptance Scenarios**:
 
-1. **Given** a person who belongs to only one workspace, **When** they sign in, **Then** they go
-   straight into it: internal users to the workspace's app, external users to its Portal.
-2. **Given** a person who belongs to several workspaces, **When** they sign in, **Then** they see
-   a list of their workspaces and pick one.
-3. **Given** a person who came from a workspace's own address, **When** they sign in, **Then**
-   they are sent straight back to that workspace.
-4. **Given** a signed-in person, **When** they switch to another of their workspaces, **Then**
-   they go there without signing in again.
-5. **Given** a wrong email, username or password, **When** the person tries to sign in, **Then**
+1. **Given** a person with a workspace, **When** they sign in, **Then** they go straight into it:
+   internal users to the workspace's app, external users to its Portal.
+2. **Given** an account holder without a workspace, **When** they sign in, **Then** they go to
+   their account page in the Hub.
+3. **Given** the master user, **When** they sign in, **Then** they go to STMS in the Hub.
+4. **Given** a wrong email, username or password, **When** the person tries to sign in, **Then**
    they see only "Incorrect email, username or password", which never says which part was wrong.
-6. **Given** too many failed attempts, **When** the person tries again, **Then** they see "Too
+5. **Given** too many failed attempts, **When** the person tries again, **Then** they see "Too
    many attempts. Please try again in a minute."
-7. **Given** a suspended login, **When** the person signs in, **Then** they see "This account is
+6. **Given** a suspended login, **When** the person signs in, **Then** they see "This account is
    suspended. Please contact support."
-8. **Given** an archived login, **When** the person signs in, **Then** they see "This account is
+7. **Given** an archived login, **When** the person signs in, **Then** they see "This account is
    no longer active. Please contact support."
-9. **Given** a signed-in person, **When** they sign out, **Then** their session on that device
+8. **Given** a signed-in person, **When** they sign out, **Then** their session on that device
    ends straight away.
-10. **Given** a person whose session ended while they were working, **When** they sign in again,
-    **Then** they return to the same page, with anything they had typed still there.
+9. **Given** a person whose session ended while they were working, **When** they sign in again,
+   **Then** they return to the same page, with anything they had typed still there.
 
 ---
 
@@ -98,15 +95,16 @@ one, and confirm the old password no longer works.
 4. **Given** a temporary password not used within 24 hours, **When** someone tries it, **Then** it
    no longer works.
 5. **Given** a client workspace's admin, **When** they manage their users, **Then** they can't
-   reset anyone's password, because one login opens all of a person's workspaces.
+   reset anyone's password, because logins are kept in the Hub and only xpro's team manages
+   them.
 
 ---
 
 ### User Story 4 - Manage own profile (Priority: P2)
 
 Anyone with a login can view and change their own name, phone number and profile picture, and
-change their password. Their email and username are shown but can't be changed. Their profile is
-shared by all their workspaces.
+change their password. Their email and username are shown, but only the master user can change
+them.
 
 **Why this priority**: name, phone and username are already entered on first sign-in, so editing
 them later is useful but not needed to start using xpro.
@@ -128,15 +126,13 @@ the changes are saved and the old password no longer works.
    valid new one, **Then** the password changes and their sessions on other devices end.
 6. **Given** a person viewing their profile, **When** they look at their email and username,
    **Then** both are shown but can't be changed.
-7. **Given** a person who belongs to several workspaces, **When** they change their profile,
-   **Then** the change shows in all of them.
 
 ---
 
 ### User Story 5 - xpro's team manages logins (Priority: P2)
 
-In STMS, the master user sees every login, finds a person, and can suspend, reactivate, archive
-or restore their login, or reset its password.
+In STMS, in the Hub, the master user sees every login, finds a person, and can suspend,
+reactivate, archive or restore their login, reset its password, or change its email or username.
 
 **Why this priority**: xpro must be able to stop misuse and help people who are locked out, but
 this is rarely needed in the first days.
@@ -149,7 +145,7 @@ it, archive and restore it, and confirm someone other than the master user can't
 1. **Given** the master user in STMS, **When** they open the list, **Then** they see every active
    and suspended login with its username, name, email, phone, date created and status.
 2. **Given** a login in the list, **When** the master user opens it, **Then** they see which
-   workspaces the person belongs to.
+   workspace the person belongs to, if any.
 3. **Given** the list, **When** the master user searches by name, email or username, **Then** only
    matching logins are shown.
 4. **Given** a login, **When** the master user suspends it, **Then** they must pick a reason
@@ -159,13 +155,16 @@ it, archive and restore it, and confirm someone other than the master user can't
    sign in again with their existing password.
 6. **Given** a login, **When** the master user resets its password, **Then** it works as described
    in Story 3.
-7. **Given** a login, **When** the master user archives it, **Then** they confirm and may add a
+7. **Given** a login, **When** the master user changes its email or username, **Then** the new
+   one must follow the same rules as at sign-up, a comment is required, the old username stays
+   taken so no one else can use it, and all the person's sessions end.
+8. **Given** a login, **When** the master user archives it, **Then** they confirm and may add a
    comment; the login is hidden from the normal list, the person can't sign in, and all their
    sessions end.
-8. **Given** an archived login, **When** the master user restores it, **Then** it returns to its
+9. **Given** an archived login, **When** the master user restores it, **Then** it returns to its
    previous status.
-9. **Given** anyone other than the master user, **When** they try to open these pages, **Then**
-   they are refused.
+10. **Given** anyone other than the master user, **When** they try to open these pages, **Then**
+    they are refused.
 
 ---
 
@@ -187,19 +186,20 @@ it, archive and restore it, and confirm someone other than the master user can't
   missing rule.
 - **Failed picture upload:** the previous picture stays.
 - **Master user protects themselves:** the master user can't suspend or archive their own login.
-- **Removed from a workspace while inside it:** the person loses access straight away and is sent
-  to their list of workspaces.
-- **Workspace address they don't belong to:** after signing in, the person sees "You don't have
-  access to that workspace" and their list of workspaces.
-- **No workspaces left:** a person whose login is active but who belongs to no workspace sees "You
-  don't belong to any workspace yet. Please contact your admin." after signing in.
+- **Removed from their workspace while inside it:** the person loses access straight away and is
+  sent to the Hub, as in "No workspace" below.
+- **Another workspace's address:** a person who opens the address of a workspace they don't belong
+  to, or one that doesn't exist, is redirected to where they belong, as in Story 2.
+- **No workspace:** a person who is not an account holder and belongs to no workspace sees "You
+  don't belong to any workspace yet. Please contact your admin." after signing in. Account holders
+  without a workspace go to their account page instead.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
 - **FR-001**: A person MUST be able to create an account, with its login, using an email and a
-  password at xpro's address.
+  password in the Hub.
 - **FR-002**: Each email MUST belong to only one login, ignoring capital letters and spaces around
   it.
 - **FR-003**: At the first sign-in, a username, name and phone number MUST be entered before the
@@ -207,14 +207,15 @@ it, archive and restore it, and confirm someone other than the master user can't
 - **FR-004**: Usernames MUST be 4 to 8 characters, use only lowercase letters, numbers, dots,
   dashes and underscores, start with a letter, be unique across all of xpro, and not be on the
   reserved list.
-- **FR-005**: A username and an email MUST never change.
+- **FR-005**: People MUST NOT be able to change their own username or email. Only the master
+  user can change them; the new one follows the same rules, a comment is required, the old
+  username stays taken, and all the person's sessions end.
 - **FR-006**: Name and phone number MUST be editable and never empty. The phone number is entered
   by picking a country and typing the number, and is stored in one international format.
 - **FR-007**: A profile picture MUST be optional, a JPG, PNG or WebP of up to 2 MB, cropped to a
   square and shown as a circle, with initials shown when there is none. Location and camera
   details are removed from uploaded pictures.
-- **FR-008**: A person's login, contact and personal details MUST be stored once, in one shared
-  place, and used by all their workspaces.
+- **FR-008**: A person's login, contact and personal details MUST be stored once, in the Hub.
 - **FR-009**: Passwords MUST be 12 to 64 characters, with at least one capital letter, one number
   and one symbol.
 - **FR-010**: Passwords MUST never be stored or shown in a readable form.
@@ -233,13 +234,14 @@ it, archive and restore it, and confirm someone other than the master user can't
 - **FR-017**: Sign-in forms MUST allow pasting, password managers and browser autofill.
 - **FR-018**: Passwords, temporary passwords and session details MUST never appear in a web
   address.
-- **FR-019**: After signing in, a person MUST be sent to their workspace as set out in Story 2,
-  and MUST be able to switch between their workspaces without signing in again.
+- **FR-019**: After signing in, a person MUST be sent to where they belong, as set out in
+  Story 2.
 - **FR-020**: When a session ends while a person is working, signing in again MUST return them to
   the same page with what they had typed.
 - **FR-021**: Exactly one master user MUST be created when xpro is set up, as the first admin of
-  xpro's own workspace.
-- **FR-022**: Only the master user MUST be able to see the list of logins in STMS and act on them.
+  STMS in the Hub.
+- **FR-022**: Only the master user MUST be able to see the list of logins in STMS, in the Hub,
+  and act on them.
 - **FR-023**: The master user MUST be able to suspend a login, with a reason from the fixed list
   and an optional comment (required for Other), and to reactivate it.
 - **FR-024**: A password reset MUST create a temporary password, shown once to the master user,
@@ -250,36 +252,36 @@ it, archive and restore it, and confirm someone other than the master user can't
   optional comment. An archived login can't sign in ("This account is no longer active. Please
   contact support."), its sessions end, it is hidden from the normal list, its data is kept, and
   its email and username stay taken. It can be restored.
-- **FR-027**: Sign-ins, failed sign-ins, suspensions, reactivations, password resets, archiving
-  and restoring MUST be recorded in the audit log of xpro's own workspace, seen only by xpro's
-  team.
+- **FR-027**: Sign-ins, failed sign-ins, suspensions, reactivations, password resets, email and
+  username changes, archiving and restoring MUST be recorded in the Hub's audit log, seen only
+  by xpro's team.
 - **FR-028**: Logins MUST never be permanently deleted.
+- **FR-029**: A login MUST belong to at most one workspace for now.
 
 ### Key Entities
 
 - **Account**: the tenant created at sign-up. Linked to the login of the person who signed up
   (the account holder).
-- **Login**: a person's email, username and password, shared by all their workspaces. Has a
-  status: active, suspended or archived.
-- **Profile**: a person's name, phone number and optional picture, kept with their login and shown
-  in all their workspaces.
+- **Login**: a person's email, username and password, kept in the Hub. Has a status: active,
+  suspended or archived.
+- **Profile**: a person's name, phone number and optional picture, kept with their login.
 - **Temporary password**: created by a reset, shown once, valid for 24 hours, and replaced at the
   next sign-in.
 - **Session**: one signed-in device for one login. Ends on sign-out, after 30 days, or when the
   login changes as described in FR-015.
-- **Workspace user**: links a login to one workspace, as an internal or external user. It decides
-  where the person lands after signing in and which workspaces are in their list.
+- **Workspace user**: links a login to its one workspace, as an internal or external user. It
+  decides where the person lands after signing in.
 - **Reserved usernames**: the list of usernames nobody can take.
-- **Audit entry**: a record of a sign-in or an action by xpro's team, including any suspension
-  reason and comment, kept in xpro workspace's audit log.
+- **Audit entry**: a record of a sign-in or an action by xpro's team, including any reason and
+  comment, kept in the Hub's audit log.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
 - **SC-001**: A new person can sign up and finish their first sign-in in under 3 minutes.
-- **SC-002**: After pressing sign in with correct details, a person sees their workspace or
-  workspace list within 3 seconds on a normal connection.
+- **SC-002**: After pressing sign in with correct details, a person sees where they belong within
+  3 seconds on a normal connection.
 - **SC-003**: Every case in Story 2 and the edge cases sends the person to the right place, with
   no exceptions.
 - **SC-004**: No password, temporary password or session detail ever appears in a web address,
@@ -302,3 +304,5 @@ it, archive and restore it, and confirm someone other than the master user can't
 - Suspending a whole account and its workspaces comes with the workspaces feature.
 - xpro's team keeps the reserved-username list, which can grow.
 - xpro's domain is chosen before the first real client.
+- Each login belongs to at most one workspace; belonging to several comes in a later feature.
+- The Hub's areas share one app for now; they are split when the business grows.

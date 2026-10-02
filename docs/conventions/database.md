@@ -21,6 +21,10 @@ Applies to code that reads or writes a database.
   counts. Scaled numbers state their scale in the name.
 - **Strict tables:** every table is STRICT, so SQLite refuses values of
   the wrong type. A test fails if any table is not strict.
+- **Better Auth's tables:** Better Auth's own tables keep its names and
+  are not strict, because renaming them adds settings to every add-on and
+  risks breaking upgrades. The strict-table test skips only those tables,
+  and fields we add to them still follow our naming rules.
 - **Rules in the database too:** unique, foreign-key and value checks are
   database constraints, not only checks in code.
 - **Named checks:** every value check has a clear name, so its error can

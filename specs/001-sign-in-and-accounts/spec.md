@@ -233,7 +233,9 @@ it, archive and restore it, and confirm someone other than the master user can't
   sessions on other devices.
 - **FR-017**: Sign-in forms MUST allow pasting, password managers and browser autofill.
 - **FR-018**: Passwords, temporary passwords and session details MUST never appear in a web
-  address.
+  address. The only exception is the one-time code that sends a person from the Hub to their
+  workspace: it works once, expires within minutes, and is useless without the workspace's own
+  secret.
 - **FR-019**: After signing in, a person MUST be sent to where they belong, as set out in
   Story 2.
 - **FR-020**: When a session ends while a person is working, signing in again MUST return them to
@@ -285,7 +287,8 @@ it, archive and restore it, and confirm someone other than the master user can't
 - **SC-003**: Every case in Story 2 and the edge cases sends the person to the right place, with
   no exceptions.
 - **SC-004**: No password, temporary password or session detail ever appears in a web address,
-  log or audit entry.
+  log or audit entry, apart from the one-time code allowed by FR-018, which never appears in logs
+  or audit entries.
 - **SC-005**: The master user can find any login and suspend it in under 1 minute.
 - **SC-006**: A suspended or archived person loses access at their next action, wherever they are
   signed in.

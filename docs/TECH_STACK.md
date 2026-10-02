@@ -33,7 +33,11 @@
 - TypeScript
 - Cloudflare Workers
 - TanStack Start server functions/routes
-- Better Auth (email and password; native scrypt for password hashing)
+- Better Auth (email and password; native scrypt for password hashing;
+  username, admin, JWT and OAuth provider add-ons; the Hub is the sign-in
+  provider for workspaces)
+- oauth4webapi (workspace apps finish sign-in through the Hub; certified
+  OpenID Connect client)
 - AccessControl v3 (to confirm when planning Access control)
 - Cloudflare D1 (shared login details and the placement record)
 - Kysely (kysely-durable-objects for Durable Objects, exact version pinned;

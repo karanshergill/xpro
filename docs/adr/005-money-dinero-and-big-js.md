@@ -16,6 +16,10 @@
 - Money is handled with Dinero.js version 2: each amount is stored in the
   currency's smallest unit together with its currency.
 - Other exact decimals are handled with big.js.
+- Other exact decimals are stored as whole numbers at a fixed scale for
+  each column (for example, a quantity kept in thousandths), never in
+  SQLite's decimal type, which rounds. Every save checks the value fits
+  within JavaScript's safe whole-number range.
 - Amounts are shown to users with the platform's built-in formatting, in the
   user's language.
 
@@ -32,4 +36,5 @@
 - **Better:** exact totals, currencies that cannot be mixed by mistake, and
   splits that always add up.
 - **Costs:** two libraries to learn, and a rule to follow: amounts never pass
-  through plain numbers on the way.
+  through plain numbers on the way. Each exact-decimal column needs its
+  scale chosen when it is created.

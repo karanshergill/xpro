@@ -58,8 +58,10 @@
 
 ## 6. Save helper
 
-- **Decision:** open, decided by the save helper's first test, which compares running Kysely-built
-  statements inside the Durable Object's one-step transaction with running Kysely inside the
-  async transaction. The result goes into ADR-002.
-- **Rationale:** `kysely-durable-objects` blocks Kysely's own transactions, and the async method
-  needs proof that it keeps all-or-nothing.
+- **Decision:** ordinary Kysely code inside the Durable Object's async all-or-nothing block,
+  through one save helper (ADR-002).
+- **Rationale:** a local test confirmed all-or-nothing on failure, reads inside a save, and
+  correct numbering with 500 saves at once. Saves run one at a time per workspace, so no outside
+  call happens inside a save.
+- **Alternatives considered:** Kysely-built statements run as plain SQL in the one-step block
+  (no reading and deciding in the middle of a save).

@@ -86,6 +86,10 @@ Applies to code that reads or writes a database.
 - **One save helper:** every save with more than one step goes through the
   save helper's explicit transaction, never relying on writes being
   grouped automatically.
+- **Nothing outside inside a save:** a save never calls an outside service
+  or waits on a timer, because the workspace runs one save at a time and
+  everyone else would wait. Outside calls happen after the save, through
+  outgoing messages.
 - **Shared database saves:** the shared database cannot keep a
   transaction open, so an all-or-nothing change to it is sent as one
   batch.

@@ -16,10 +16,13 @@
       everyone.
 - [ ] The release runs through the one deploy script, the same on a laptop
       and in CI, which accepts only a named environment.
+- [ ] After deploying, the live app's reported code version matches the
+      version just released.
 - [ ] New features are behind feature flags, switched off by default.
 - [ ] Every workspace app reports its version, and STMS shows which
       workspace runs which version.
 - [ ] No secrets are in git.
+- [ ] Page size and speed stay within the agreed budget, checked in CI.
 - [ ] Changes touching sign-in, permissions or data passed the
       [security checklist](./SECURITY_CHECKLIST.md) in code review.
 - [ ] `shortcut:` comments have been reviewed.
@@ -33,3 +36,8 @@
 - [ ] An incident playbook is written and rehearsed: who is contacted, how
       damage is contained, and how data is restored.
 - [ ] Error and uptime alerts are set up.
+- [ ] Alerts fire on spikes in failed sign-ins and on permission changes.
+- [ ] A `security.txt` file at `/.well-known/` tells researchers how to
+      report problems.
+- [ ] The Hub's master user has two-step sign-in.
+- [ ] Privacy and data handling have been checked by a lawyer.

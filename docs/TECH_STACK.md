@@ -13,6 +13,7 @@
 - Valibot
 - Vite
 - Tailwind CSS v4 (styling, through its Vite plugin)
+- shadcn/ui (Base UI; components copied into our code; right-to-left ready)
 - react-image-crop (profile picture cropping)
 - Paraglide JS (translations)
 - barcode-detector (camera barcode scanning; its scanner file is served from
@@ -70,7 +71,7 @@
   before the first real client
 
 ## Tooling
-- Bun
+- Bun (including `bun audit` in the automatic checks)
 - Wrangler
 - Cloudflare Vite Plugin
 - Vitest
@@ -89,11 +90,12 @@
   exact version pinned)
 - GitHub Actions (checks and deploys)
 - Dependabot
+- Faker (@faker-js/faker; test data, local development data and demo data
+  only)
 
 ## Later
 - Cloudflare Hyperdrive (external databases for large workspaces)
 - Mobile number with OTP, and Google login
 - Sentry (error and uptime alerts; free plan; set up before the first real
   client)
-- UI component kit on top of Tailwind (to decide)
 - k6 (load testing; confirm before the first real client)

@@ -1,0 +1,49 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "xpro-tests",
+  "main": "../apps/web/src/workspace/workspace.db.ts",
+  "compatibility_date": "2025-09-02",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "unhandled_rejection_after_microtask_checkpoint"
+  ],
+  "vars": {
+    "XPRO_TEST_ENVIRONMENT": "test"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "xpro-tests",
+      "remote": false
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "PROFILE_PICTURES",
+      "bucket_name": "xpro-tests",
+      "remote": false
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "PLACEMENTS",
+      "remote": false
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "WORKSPACES",
+        "class_name": "Workspace"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "Workspace"
+      ]
+    }
+  ]
+}

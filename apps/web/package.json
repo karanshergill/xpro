@@ -10,23 +10,27 @@
     "generate-routes": "tsr generate",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "bun run build && wrangler deploy"
+    "deploy": "bun run build && wrangler deploy",
+    "generate-runtime-types": "wrangler types ../../worker-runtime.d.ts --include-env=false",
+    "generate-types": "wrangler types --env-interface WorkspaceEnv --include-runtime=false",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@tanstack/react-router": "latest",
-    "@tanstack/react-start": "latest",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "@tanstack/react-router": "1.170.41",
+    "@tanstack/react-start": "1.168.60",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "oauth4webapi": "3.8.8"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.26.0",
-    "@tanstack/router-cli": "^1.132.0",
-    "@types/node": "^22.10.2",
-    "@types/react": "^19.2.0",
-    "@types/react-dom": "^19.2.0",
-    "@vitejs/plugin-react": "^6.0.1",
-    "typescript": "^6.0.2",
-    "vite": "^8.0.0",
-    "wrangler": "^4.70.0"
+    "@cloudflare/vite-plugin": "1.57.2",
+    "@tanstack/router-cli": "1.167.38",
+    "@types/node": "22.20.4",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "typescript": "6.0.3",
+    "vite": "8.3.5",
+    "wrangler": "4.136.2"
   }
 }

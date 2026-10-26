@@ -1,0 +1,21 @@
+{
+  "name": "@xpro/stms",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@xpro/accounts": "workspace:*",
+    "@xpro/core": "workspace:*"
+  },
+  "imports": {
+    "#*": "./src/*"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3"
+  }
+}

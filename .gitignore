@@ -12,3 +12,8 @@ __unconfig*
 todos.json
 .env*
 .dev.vars*
+.certs/
+worker-runtime.d.ts
+worker-configuration.d.ts
+apps/hub/src/routeTree.gen.ts
+coverage/

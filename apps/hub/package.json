@@ -1,0 +1,39 @@
+{
+  "name": "@xpro/hub",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@better-auth/oauth-provider": "1.7.12",
+    "better-auth": "1.7.12",
+    "kysely": "0.28.18",
+    "kysely-d1": "0.4.0",
+    "@tanstack/react-router": "1.170.41",
+    "@tanstack/react-start": "1.168.60",
+    "@xpro/accounts": "workspace:*",
+    "@xpro/stms": "workspace:*",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "imports": {
+    "#*": "./src/*"
+  },
+  "scripts": {
+    "dev": "vite dev --port 3001",
+    "generate-routes": "tsr generate",
+    "build": "vite build",
+    "preview": "vite preview",
+    "generate-types": "wrangler types --env-interface HubEnv --include-runtime=false",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "1.57.2",
+    "@tanstack/router-cli": "1.167.38",
+    "@types/node": "22.20.4",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "typescript": "6.0.3",
+    "vite": "8.3.5",
+    "wrangler": "4.136.2"
+  }
+}

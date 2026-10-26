@@ -1,0 +1,23 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "xpro-router",
+  "compatibility_date": "2025-09-02",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "unhandled_rejection_after_microtask_checkpoint"
+  ],
+  "main": "src/router.server.ts",
+  "services": [
+    {
+      "binding": "HUB",
+      "service": "xpro-hub",
+      "remote": false
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "PLACEMENTS",
+      "remote": false
+    }
+  ]
+}

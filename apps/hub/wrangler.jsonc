@@ -1,0 +1,24 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "xpro-hub",
+  "compatibility_date": "2025-09-02",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "unhandled_rejection_after_microtask_checkpoint"
+  ],
+  "main": "@tanstack/react-start/server-entry",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "xpro-hub",
+      "remote": false
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "PROFILE_PICTURES",
+      "bucket_name": "xpro-profile-pictures",
+      "remote": false
+    }
+  ]
+}

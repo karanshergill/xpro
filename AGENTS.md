@@ -19,7 +19,8 @@ bun run build
 ```
 
 This is a Bun workspaces monorepo. Apps live in `apps/`, shared packages in `packages/`.
-The root scripts run the matching script in `apps/web` (`bun --filter @xpro/web <script>`),
+The default root scripts (`dev`, `build`, `preview`, `deploy`) run the matching
+script in `apps/web` (`bun --filter @xpro/web <script>`),
 whose dev script is:
 
 ```bash
@@ -31,6 +32,13 @@ Therefore start development from the repository root with:
 ```bash
 bun run dev
 ```
+
+Local HTTPS requires the certificate setup in
+`specs/001-sign-in-and-accounts/quickstart.md` before the first dev run.
+Start the Hub and router in separate terminals with `bun run dev:hub` and
+`bun run dev:router`. `bun run typecheck` generates Worker types and checks
+all workspaces and the test project; `bun run build:all` builds all three apps locally.
+Run permanent Workers tests with `bun run test` (Vitest), not Bun's built-in `bun test`.
 
 The Worker name `xpro` in `apps/web/wrangler.jsonc` must not change: Durable Object data belongs to it.
 

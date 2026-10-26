@@ -1,0 +1,27 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "types": [
+      "node",
+      "@cloudflare/vitest-plugin/types",
+      "./worker-configuration.d.ts"
+    ],
+    "paths": {
+      "#test/*": [
+        "./support/*"
+      ]
+    }
+  },
+  "include": [
+    "./**/*.ts",
+    "./**/*.tsx",
+    "../vitest.config.ts",
+    "../packages/*/src/**/*.test.ts",
+    "../packages/*/src/**/*.test.tsx",
+    "../apps/*/src/**/*.test.ts",
+    "../apps/*/src/**/*.test.tsx",
+    "../apps/*/scripts/**/*.test.ts",
+    "../apps/*/scripts/**/*.test.tsx"
+  ]
+}

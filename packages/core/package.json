@@ -1,0 +1,26 @@
+{
+  "name": "@xpro/core",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "kysely": "0.28.18",
+    "kysely-durable-objects": "0.2.2",
+    "temporal-polyfill": "1.0.6",
+    "true-myth": "9.4.0",
+    "uuid": "14.0.3",
+    "valibot": "1.5.0"
+  },
+  "imports": {
+    "#*": "./src/*"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server/index.server.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3"
+  }
+}

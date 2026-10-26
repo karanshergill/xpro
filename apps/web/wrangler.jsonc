@@ -2,6 +2,32 @@
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "xpro",
   "compatibility_date": "2025-09-02",
-  "compatibility_flags": ["nodejs_compat"],
-  "main": "@tanstack/react-start/server-entry"
+  "compatibility_flags": [
+    "nodejs_compat",
+    "unhandled_rejection_after_microtask_checkpoint"
+  ],
+  "main": "src/server.ts",
+  "services": [
+    {
+      "binding": "HUB",
+      "service": "xpro-hub",
+      "remote": false
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "WORKSPACES",
+        "class_name": "Workspace"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "Workspace"
+      ]
+    }
+  ]
 }

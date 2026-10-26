@@ -45,6 +45,35 @@ and Durable Objects.
   includes the request ID, written to the standard output. The app never
   manages log files.
 
+The shared helpers live in `@xpro/core/server`, a server-only public entry:
+
+- At a public entry point, call `createRequestContext()` and overwrite any
+  caller-supplied `x-request-id` when forwarding. Internal binding calls can
+  carry it in `requestIdHeader` and use `readForwardedRequestContext()`;
+  RPC calls can pass the plain context. It never carries authentication proof.
+  A saved login-creation reference stays separate and survives retries; a new
+  public request gets a new request ID. Record IDs still follow ADR-004.
+- For xpro JSON handlers, `readJsonInput(request, entries)` accepts UTF-8 JSON
+  objects up to 64 KiB, counting actual streamed bytes rather than trusting
+  Content-Length. `parseInput(input, entries)` validates already-decoded input.
+  Define `entries` in code with Valibot. Unknown fields are refused and all
+  invalid, known top-level field names are returned once. Submitted values,
+  unknown keys and validator messages are never copied into these errors.
+- Both return true-myth results. Use `createErrorResponse(error, context)`
+  for core failures: only the declared code, static message, request ID and
+  invalid field names are returned, with the ID header and `no-store`.
+  `reportUnexpectedError(context)` emits one safe JSON event and a generic 500;
+  its diagnostic limit and upgrade trigger are marked in the code.
+
+These helpers do not automatically wrap app endpoints. Apply them when wiring
+xpro handlers, and use supported limits for framework, auth and protocol
+bodies. Uploads have their own limits; they do not use the JSON reader.
+
+References: [Valibot parsing](https://valibot.dev/api/safeParse/),
+[strict objects](https://valibot.dev/api/strictObject/),
+[true-myth results](https://true-myth.dev/api/result/) and
+[Workers streams](https://developers.cloudflare.com/workers/runtime-apis/streams/readablestream/).
+
 ## Retries and outside calls
 
 - **Safe retries:** every request that changes data carries a unique

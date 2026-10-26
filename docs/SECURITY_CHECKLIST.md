@@ -2,8 +2,13 @@
 
 Checked in code review for every change that touches sign-in, permissions or data.
 
-- [ ] **Signed in is not allowed:** every request re-checks that the user is still
-      an active user of this workspace, with the right role.
+- [ ] **Signed in is not enough:** every protected request follows the
+      [shared access checks](../specs/001-sign-in-and-accounts/contracts/server-functions.md#access-checks),
+      confirming a valid session, an active login with completed creation and
+      permission for the requested action.
+- [ ] **Safe creation retries:** unfinished logins cannot use xpro. A retry
+      checks current permissions and uses the same saved creation reference;
+      an unrelated existing login is never adopted or changed.
 - [ ] **Bounded input:** every server function that takes data checks it with
       limits on lengths, sizes and counts, not only on types.
 - [ ] **Only what's needed:** responses carry only the fields the screen uses,

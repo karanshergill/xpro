@@ -2,30 +2,36 @@
 
 ## Tenants
 
-- **Account:** the tenant: whoever signs up with xpro. An account owns
-  one workspace for now; several come later. Everyone else in a
-  workspace belongs to it as a workspace user, with their own login, and
-  owns nothing.
+- **Account:** a person or business that owns a workspace; the tenant.
+  An account can exist before its workspace is created. At most one
+  workspace per account for now; several come later. Workspace users
+  have their own logins; membership does not grant account ownership.
 - **Workspace:** what it is for is up to the account holder.
 - **Billing:** each workspace has its own subscription and is billed
   separately.
-- **Isolation:** workspaces share no data. The only shared thing is
-  each person's login, contact and personal details, which are kept
-  in one place. Everything else about a person, such as their roles,
-  teams and entities, stays inside each workspace.
+- **Isolation:** workspaces share no business data. The Hub keeps
+  shared login, contact and personal details, workspace membership,
+  and who may manage members. Business roles, permissions, teams,
+  entities and business records stay inside each workspace.
 
 ## Hub
 
 - **Purpose:** a separate app, at its own address, that serves every
   workspace.
-- **Sign-in and my account:** sign-up, the central sign-in page, and each
+- **Sign-in and my account:** the central sign-in page, and each
   person's profile and password.
+- **Public sign-up:** disabled for now. No public sign-up page, and
+  direct registration requests are refused. Logins are created through
+  trusted setup or by master users. Workspace owners and workspace
+  users with permission to create logins may create non-master logins
+  only for their own workspace and must add them to that workspace.
+  Revisit public sign-up only after its onboarding flows are separately
+  planned and approved.
 - **Account admin:** account holders manage their account, workspaces and
   subscriptions here.
-- **SaaS Tenant Management System (STMS):** xpro's team manages logins,
+- **SaaS Tenant Management System (STMS):** master users manage logins,
   accounts, workspaces (create, name, copy, delete), picking modules, and
-  subscriptions and billing. The master user is its first admin, with
-  complete access.
+  subscriptions and billing.
 - **Special power:** only STMS can create, change or suspend workspaces.
 - **One app for now:** these areas share one app. They are split, and
   STMS isolated, when the business grows.
@@ -135,15 +141,18 @@
 
 - **Workspace users:** the people inside a workspace, internal or
   external.
-- **One workspace for now:** a person belongs to at most one workspace,
-  and goes straight into it after signing in. People without a workspace
-  go to their account page in the Hub. Belonging to several workspaces
-  comes later.
+- **Membership:** the Hub keeps the official list of who belongs.
+  Each workspace keeps its local user details, business permissions
+  and history. A local user record alone does not grant access.
+- **One workspace for now:** a person belongs to at most one workspace.
+  Belonging to several workspaces comes later.
+- **After sign-in:** follow the destinations in the
+  [sign-in specification](../../specs/001-sign-in-and-accounts/spec.md).
 - **Internal users:** the tenant's staff, who use the modules.
 - **External users:** the tenant's customers and suppliers, who see
   only their own records, in the workspace's Portal.
-- **First admin:** the account holder who creates a workspace
-  becomes its first admin.
+- **Initial owner:** the Account holder becomes the Workspace owner
+  when the workspace is created.
 - **Archiving:** users are archived, never deleted, so history stays
   intact.
 - **Teams:** groups of internal users, used for grouping people,
@@ -157,8 +166,8 @@
 
 - **What:** every important action in a workspace is recorded: who did
   it (a person or an automatic job), what was done, and exactly when.
-- **Tamper-proof:** entries can only be added, never changed or deleted,
-  not even by admins.
+- **Append-only:** entries can be added, but the app cannot change or
+  delete them, even when used by an admin.
 - **Where:** each workspace's audit log is kept inside that workspace's
   own storage.
 - **Hub:** the Hub keeps its own audit log, under the same rules, for
@@ -172,14 +181,12 @@
   details.
 - **Blocked in the database:** the database itself refuses to change or
   delete audit entries.
-- **Chained:** each entry stores a fingerprint of the one before it, so a
-  changed or removed entry breaks the chain.
-- **Daily outside proof:** once a day, each workspace's latest
-  fingerprint is sent to an independent public timestamp service, which
-  proves it existed at that time. xpro cannot alter that record, so even
-  a change by xpro's own team would be caught.
-- **Checked:** a regular job re-checks every chain and alerts xpro if one
-  is broken. Workspace admins can run the check themselves.
+- **Initial version:** no fingerprint chains, outside timestamp proof or
+  integrity-check jobs.
+- **Accepted limit:** someone with full database control could rewrite
+  history without independent detection.
+- **Harden later:** revisit if a customer or audit requirement calls for
+  independently verifiable history.
 
 ## Core: Unusual activity
 

@@ -5,8 +5,11 @@
 ### I. Workspace Isolation
 
 - **No shared data:** workspaces MUST NOT share business data. Each workspace has its own storage.
-- **Only shared thing:** each person's login, contact and personal details, kept in one place.
-- **Everything else stays inside:** roles, teams, entities and all records live in the workspace.
+- **Shared identity:** each person's login, contact and personal details stay in the Hub.
+- **Workspace membership:** the Hub keeps the official list of who belongs to each workspace
+  and who may manage its members.
+- **Business data stays inside:** business roles and permissions, teams, entities and
+  business records stay inside each workspace.
 - **Why:** a tenant's data must never leak into, or depend on, another workspace.
 
 ### II. Runs Anywhere
@@ -88,4 +91,4 @@
 - **Checks:** every plan and review MUST confirm it follows these rules. Any exception MUST
   be written down with its reason.
 
-**Version**: 3.0.0 | **Ratified**: 2026-09-24 | **Last Amended**: 2026-10-02
+**Version**: 5.0.0 | **Ratified**: 2026-09-24 | **Last Amended**: 2026-10-19

@@ -1,0 +1,33 @@
+{
+  "task": "T063 Turnstile setup",
+  "status": "created_and_verified",
+  "accountId": "35ff2b49c05d63c1ab9be216933c774a",
+  "verifiedAt": "2026-11-04T11:54:09.707Z",
+  "widget": {
+    "name": "xpro-hub-test",
+    "sitekey": "0x4AAAAAAFzTvt0CCq6_pnSD",
+    "mode": "managed",
+    "domains": [
+      "xpro-hub-test.karanshergill.workers.dev"
+    ],
+    "clearance_level": "no_clearance",
+    "region": "world",
+    "bot_fight_mode": false,
+    "offlabel": false,
+    "ephemeral_id": false,
+    "created_on": "2026-11-04T11:52:20.158698Z"
+  },
+  "privateKeys": {
+    "path": ".cloudflare-test.local/turnstile.json",
+    "directoryMode": "0700",
+    "fileMode": "0600",
+    "valuesExcluded": true
+  },
+  "remoteWrites": 1,
+  "workerDeployments": 0,
+  "databaseInitialization": false,
+  "hostedAcceptance": "verified_in_T063",
+  "hostedAcceptanceVerifiedOn": "2026-11-05",
+  "hostedEvidence": "quickstart.md#hosted-verification-t063",
+  "snapshotScope": "Creation-step counters are historical; hostedEvidence records the completed T063 verification."
+}

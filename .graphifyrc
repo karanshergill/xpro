@@ -1,0 +1,2 @@
+# Read Cloudflare binding configuration as text for documentation analysis.
+language.jsonc=.md

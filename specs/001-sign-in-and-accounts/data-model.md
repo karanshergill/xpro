@@ -19,6 +19,14 @@
 
 - phone, in one international format
 - picture key, pointing to the picture in R2
+- `name_search`, a private trim/JavaScript-lowercase copy of `name`, maintained
+  in the same name write. It is not a public input or response field. The
+  forward migration backfills old names without changing canonical fields.
+  `user_login_name_prefix_idx(name_search, id)` supports literal name prefixes;
+  `user_login_list_idx(archived_at, createdAt, id)` supports normal ordered pages.
+  Email/username search reuses the native normalized unique indexes. See
+  [ADR-028](../../docs/adr/028-indexed-master-login-reads.md) for Unicode matching,
+  interrupted upgrades and rebuilding after an older writer is restored.
 - `archived_at`, and the status before archiving
 - `login_creation_id`, a server-set link to the login creation request for Story 6.
   It is written with the initial login record and cannot be supplied or changed
@@ -27,6 +35,13 @@
 ### Own tables
 
 - **`accounts`:** id, owner login, `created_at`.
+- **`workspace_placements`:** id, unique `organization_id` linking the workspace,
+  unique `worker_name`, `created_at`. STMS owns these routing records.
+- **`workspace_addresses`:** id, `workspace_placement_id`, unique HTTPS `origin`,
+  `is_primary` (0 or 1), `created_at`. An origin is the scheme, host and optional
+  port, without a page path. A workspace has at most one primary address;
+  its other addresses resolve to the same app. These links use RESTRICT.
+  T021 reads prepared records; creation and domain-management actions come later.
 - **`reserved_usernames`:** username, `added_at`.
 - **`login_creations`:** id (the stable creation reference), creator login, intended
   workspace if any, created login when known, chosen internal/external type where

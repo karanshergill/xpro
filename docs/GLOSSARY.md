@@ -8,6 +8,10 @@ database and screens. Add a term here before using it.
   workspace per account for now; several come later.
 - **Account holder:** the person behind an account, who manages it from
   their account page in the Hub.
+- **Authenticator app:** an app that generates changing verification codes for
+  sign-in from a saved secret.
+- **Backup code:** a saved, single-use verification code used in place of an
+  authenticator code at sign-in. It does not replace the authenticator.
 - **Core:** the part installed in every workspace: workspace users,
   teams, entities, the audit log and unusual-activity limits.
 - **Entity:** a company or branch inside a workspace. Each user is given
@@ -34,6 +38,8 @@ database and screens. Add a term here before using it.
   permissions stay inside the workspace.
 - **Module:** a self-contained part of the app for one business area,
   with its own screens, data and rules.
+- **Multi-factor authentication (MFA):** sign-in with a password and an
+  authenticator code, or a saved backup code in place of that code.
 - **Portal:** the area where external users see their own records.
 - **Site:** a physical place, such as a plant or warehouse. Part of ERP.
 - **STMS:** SaaS Tenant Management System, the module that manages

@@ -19,9 +19,7 @@ bun run build
 ```
 
 This is a Bun workspaces monorepo. Apps live in `apps/`, shared packages in `packages/`.
-The default root scripts (`dev`, `build`, `preview`, `deploy`) run the matching
-script in `apps/web` (`bun --filter @xpro/web <script>`),
-whose dev script is:
+The default root scripts (`dev`, `build`, `preview`) run the matching script in `apps/web` (`bun --filter @xpro/web <script>`), whose dev script is:
 
 ```bash
 vite dev --port 3000
@@ -37,8 +35,17 @@ Local HTTPS requires the certificate setup in
 `specs/001-sign-in-and-accounts/quickstart.md` before the first dev run.
 Start the Hub and router in separate terminals with `bun run dev:hub` and
 `bun run dev:router`. `bun run typecheck` generates Worker types and checks
-all workspaces and the test project; `bun run build:all` builds all three apps locally.
+all workspaces and both test projects; `bun run build:all` builds all three apps locally.
+Use `bun run release --env test` to preview the complete prepared test release.
+Root `deploy` and Web's `deploy` alias use this same guarded command; publication
+requires `--publish` and approval of the exact remote actions. The command's
+Node host is development tooling. See `docs/RELEASING.md`; production remains
+unconfigured and blocked by T064.
 Run permanent Workers tests with `bun run test` (Vitest), not Bun's built-in `bun test`.
+Run screen checks with `bun run test:e2e` after the HTTPS/browser setup in the
+quickstart. The wrapper creates and removes an isolated source copy, storage and
+processes; do not invoke its Playwright config directly. Ports 3000/3001/3002 and
+9230/9231/9232 must be free.
 
 The Worker name `xpro` in `apps/web/wrangler.jsonc` must not change: Durable Object data belongs to it.
 

@@ -62,12 +62,29 @@ The shared helpers live in `@xpro/core/server`, a server-only public entry:
 - Both return true-myth results. Use `createErrorResponse(error, context)`
   for core failures: only the declared code, static message, request ID and
   invalid field names are returned, with the ID header and `no-store`.
-  `reportUnexpectedError(context)` emits one safe JSON event and a generic 500;
-  its diagnostic limit and upgrade trigger are marked in the code.
+  `reportUnexpectedError(context, { app, operation })` emits exactly the fixed
+  event, request ID, executing app and operation, then returns a generic 500.
+  App and operation labels are fixed in code, never copied from requests or
+  caught errors. Shared access checks receive the executing app explicitly;
+  the workspace being checked does not identify the executing app. Extra context
+  or location properties, exception internals and request data are excluded.
+  The diagnostic limit and upgrade trigger remain marked in the code.
+
+`readFormInput(request, entries)` applies the same 64 KiB streamed-byte limit,
+UTF-8 decoding and strict field validation to URL-encoded protocol forms. It
+refuses duplicate fields in one pass and never copies unknown field names into
+errors. The shared unsupported-media response covers both formats.
 
 These helpers do not automatically wrap app endpoints. Apply them when wiring
 xpro handlers, and use supported limits for framework, auth and protocol
 bodies. Uploads have their own limits; they do not use the JSON reader.
+
+The Hub and workspace server functions use JSON POST. Their Workers call
+`prepareServerFunctionRequest` from Core to bound serialized JSON through
+`readInputText` before Start deserializes it, check the exact configured Origin,
+and leave decoded field validation to the action. Workspace functions reuse the
+prepared live access context; a page ID hint can only refuse an identity change.
+Uploads or other encodings need their own approved boundary.
 
 References: [Valibot parsing](https://valibot.dev/api/safeParse/),
 [strict objects](https://valibot.dev/api/strictObject/),
@@ -79,6 +96,23 @@ References: [Valibot parsing](https://valibot.dev/api/safeParse/),
 - **Safe retries:** every request that changes data carries a unique
   request key. The server remembers each key for a set time and answers
   a repeat with the first result instead of saving again.
+- **Password submissions:** own-password changes and master resets accept no
+  replay key and are never retried automatically. A lost reply can follow a
+  committed password change; see ADR-024 and ADR-025.
+- **MFA submissions:** native setup, verification and factor changes accept no
+  replay key and are never retried automatically. Single-use proof and guarded
+  writes enforce their own state transitions. A lost reply can follow a committed
+  change; read current state before explicit recovery. See ADR-043 and ADR-044.
+- **Own-profile submissions:** setting the actor's name and phone in one update
+  is safe to submit again without creating another record. It accepts no replay
+  key and checks current access again for every submission.
+- **Picture submissions:** accept no replay key and never retry automatically.
+  Use generated immutable keys and guard the pointer save by its previous value.
+  An unknown result may have committed; read back before deciding on cleanup.
+- **Master login-management submissions:** accept no replay key and never retry
+  automatically. Repeated lifecycle transitions conflict; unchanged normalized
+  identifiers are no-ops. A lost reply may follow a committed atomic change.
+  Read current state before a fresh submission; see ADR-027.
 - **Time limits:** every call to an outside service has a time limit and
   a planned response when it fails, so a slow service never stalls the
   app.
@@ -131,7 +165,8 @@ References: [Valibot parsing](https://valibot.dev/api/safeParse/),
 
 - **Our own file names:** the server builds each stored file's path from
   the workspace and a random ID. A user's file name is kept only as
-  data, never used in the path.
+  data, never used in the path. Hub identity pictures use the affected login's
+  ID instead of a workspace ID.
 - **Checked contents:** a file's real type is read from its first bytes,
   not trusted from its name or the browser.
 - **Size limits:** uploads pass through our server, which cuts them off

@@ -1,0 +1,99 @@
+{
+  "task": "T062 resource creation",
+  "status": "created_and_verified",
+  "accountId": "35ff2b49c05d63c1ab9be216933c774a",
+  "verifiedAt": "2026-11-03T15:22:42.470Z",
+  "retainedFor": "Persistent Cloudflare test environment",
+  "resources": {
+    "hubDatabase": {
+      "name": "xpro-hub-test",
+      "id": "28f995c1-9c2f-4dfa-b050-86ee0baf73bf",
+      "region": "APAC",
+      "tables": 0
+    },
+    "placementsNamespace": {
+      "name": "xpro-placements-test",
+      "id": "52c196caafa54a7aa333318c8031dbba"
+    },
+    "picturesBucket": {
+      "name": "xpro-profile-pictures-test",
+      "location": "APAC",
+      "jurisdiction": "default",
+      "storageClass": "Standard",
+      "r2DevEnabled": false,
+      "customDomains": []
+    },
+    "dispatchNamespace": {
+      "name": "xpro-workspaces-test",
+      "id": "1982cd8e-cc27-444f-bd72-6d9bb3658aaf",
+      "scripts": 0
+    },
+    "flagshipApp": {
+      "name": "xpro-hub-test",
+      "id": "d6054b12-d093-4d58-b5ef-7ca8e03bac3e"
+    }
+  },
+  "savedFlag": {
+    "key": "accounts_picture_policy",
+    "type": "json",
+    "default_variation": "paused",
+    "variations": {
+      "paused": {
+        "canUpload": false,
+        "maximumBytes": 2097152
+      },
+      "standard": {
+        "canUpload": true,
+        "maximumBytes": 2097152
+      },
+      "reduced": {
+        "canUpload": true,
+        "maximumBytes": 1048576
+      }
+    },
+    "rules": [],
+    "description": null,
+    "enabled": false,
+    "updated_at": "2026-11-03T15:22:42.114Z",
+    "updated_by": "unknown"
+  },
+  "completedActions": [
+    {
+      "step": 1,
+      "status": "created_and_verified",
+      "verifiedAt": "2026-11-03T15:21:13.675Z"
+    },
+    {
+      "step": 2,
+      "status": "created_and_verified",
+      "verifiedAt": "2026-11-03T15:21:32.428Z"
+    },
+    {
+      "step": 3,
+      "status": "created_and_verified",
+      "verifiedAt": "2026-11-03T15:21:48.518Z"
+    },
+    {
+      "step": 4,
+      "status": "created_and_verified",
+      "verifiedAt": "2026-11-03T15:22:02.168Z"
+    },
+    {
+      "step": 5,
+      "status": "created_and_verified",
+      "verifiedAt": "2026-11-03T15:22:10.921Z"
+    },
+    {
+      "step": 6,
+      "status": "created_and_verified",
+      "verifiedAt": "2026-11-03T15:22:42.470Z"
+    }
+  ],
+  "remoteWrites": 6,
+  "subscriptionActivations": 0,
+  "workerDeployments": 0,
+  "configurationChanges": 0,
+  "remaining": "Resource-creation snapshot retained. T062 preparation and T063 hosted checks are complete; T064 production readiness remains open.",
+  "hostedEvidence": "quickstart.md#hosted-verification-t063",
+  "snapshotScope": "Creation-step counters are historical; hostedEvidence records the completed T063 verification."
+}

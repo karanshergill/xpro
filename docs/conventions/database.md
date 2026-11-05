@@ -23,8 +23,19 @@ Applies to code that reads or writes a database.
   the wrong type. A test fails if any table is not strict.
 - **Better Auth's tables:** Better Auth's own tables keep its names and
   are not strict, because renaming them adds settings to every add-on and
-  risks breaking upgrades. The strict-table test skips only those tables,
-  and fields we add to them still follow our naming rules.
+  risks breaking upgrades. The strict-table test skips those tables
+  and Kysely's two migration bookkeeping tables. Fields we add to auth
+  tables still follow our naming rules. Better Auth keeps its native
+  internal delete actions; a database trigger refuses physical login
+  deletion. xpro-owned links use RESTRICT.
+- **Migration bookkeeping:** `kysely_migration` and
+  `kysely_migration_lock` keep Kysely's native names, columns and
+  non-STRICT definitions. They contain framework state, not business data.
+- **Hub references in workspace storage:** login and Hub-session IDs
+  point outside the workspace database. Index them locally; SQLite cannot
+  enforce foreign keys across these databases. A session or audit actor
+  does not require a local workspace-user row. Shared access checks
+  validate Hub identity and permission.
 - **Rules in the database too:** unique, foreign-key and value checks are
   database constraints, not only checks in code.
 - **Named checks:** every value check has a clear name, so its error can
@@ -50,14 +61,28 @@ Applies to code that reads or writes a database.
 - **Dates and moments:** dates are stored as `YYYY-MM-DD`. Moments in time
   are stored in UTC, always in one fixed text format, so they sort
   correctly.
-- **Accents and case:** SQLite ignores case and accents only for A to Z.
-  Emails and searchable names get a lower-cased search copy made in
-  code, and uniqueness and search use that copy.
+- **Accents and case:** SQLite's built-in `lower()` and `NOCASE` fold only
+  ASCII case; they do not remove accents. Searchable names get a trimmed,
+  JavaScript-lowercase copy made in code and maintained in the same name write.
+  The Hub's private `user.name_search` uses literal BINARY prefix ranges, not
+  full Unicode case folding. Native email/username columns keep their existing
+  unique `lower(trim(...))` expression indexes. Search must match the exact
+  indexed expressions; verify all branches in the real query plan (ADR-028).
 - **Custom field values:** follow the same rules inside a record's custom
   data as built-in fields.
 - **Code names:** tables and columns are snake_case in the database and
   camelCase in code, converted by Kysely's `CamelCasePlugin` with keys
-  inside stored JSON left unchanged.
+  inside stored JSON left unchanged. The shared `createHubConnection` in
+  `@xpro/core/server` uses Better Auth's D1 adapter. Each data layer provides
+  its typed table view; the Hub keeps its complete model and migrations.
+  Use native auth APIs for identity and credentials. The first-sign-in profile
+  action uses an explicit Kysely update because its username audit must commit
+  in the same D1 batch (ADR-016). Own-profile saving updates name and private
+  phone together in one indexed statement (ADR-025). Password reset uses the
+  configured native hash and explicit credential, token and session writes so all changes and its audit
+  share one batch (ADR-024). Keep its native-schema and revocation tests on auth
+  upgrades. Direct queries naming native camelCase columns must use
+  `db.withoutPlugins()`.
 
 ## Queries
 
@@ -77,7 +102,9 @@ Applies to code that reads or writes a database.
   index, because that database serves every workspace one query at a
   time. A test checks each query's plan and fails on a full table read.
 - **Big changes in chunks:** changes to many rows run in chunks of about
-  1,000 rows, never as one huge statement.
+  1,000 rows, or fewer when platform limits require, never one huge statement.
+  D1 statements allow 100 bound parameters; the Hub name-search backfill uses
+  25 rows with four parameters per row.
 
 ## Saves
 
@@ -90,9 +117,27 @@ Applies to code that reads or writes a database.
   or waits on a timer, because the workspace runs one save at a time and
   everyone else would wait. Outside calls happen after the save, through
   outgoing messages.
+- **Private initial setup exception:** native Better Auth login/password creation
+  and the initial-master audit are separate writes. Run this setup serially before
+  the Hub accepts writes; an interruption requires operator review. Repeats never
+  change existing logins. See ADR-013. This does not relax other STMS saves.
 - **Shared database saves:** the shared database cannot keep a
   transaction open, so an all-or-nothing change to it is sent as one
-  batch.
+  batch through `saveHub` from `@xpro/core/server`. The Hub's existing helper
+  re-exports that implementation.
+- **Native own-password exception:** use the trusted native password API and
+  retain its sequential D1 writes. A failure can end sessions before changing
+  the password, or save the password before replacement-session creation fails.
+  Return a safe error without a success cookie and do not retry automatically.
+  Revisit when an atomic native D1 API is available or complete rollback is
+  required; see ADR-025. Audited master resets follow ADR-024's atomic batch.
+
+- **Private picture exception:** R2 objects and their D1 key cannot share a
+  transaction. Stage the new file, guard the key update by its previous value,
+  then delete the old file. Confirm lost replies by reading back; if confirmation
+  fails, retain files that could be active. Committed changes remain successful
+  if old-file cleanup fails, with a safe log. Private orphans may remain; add
+  cleanup when storage usage or strict deletion/retention requires it. See ADR-026.
 
 ## Database upgrades
 
@@ -106,6 +151,19 @@ Applies to code that reads or writes a database.
 - **Old code keeps working:** a rollback always runs old code on the new
   data, so each upgrade only adds. Removing or renaming is done in a
   later release, once no running code uses the old shape.
+- **Hub DDL:** run the Kysely migrator serially before release and
+  inspect its returned error. D1 cannot use interactive transactions or
+  a migration lock. Initial CREATE statements are safe to retry; future
+  migrations must also account for interruption. Business saves still
+  use the all-or-nothing D1 batch helper.
+- **Workspace DDL:** the constructor calls `upgradeWorkspaceDatabase`
+  from `@xpro/core/server` inside its startup lock. Native storage
+  transactions group the real Kysely migrations and their bookkeeping;
+  returned migration errors are thrown so the whole upgrade rolls back.
+  If all migrations known to this code have run, leave later history
+  untouched so older code can reopen a newer additive schema.
+  The shared connection filters protected Cloudflare tables only during
+  native introspection. Never put ordinary requests in the startup lock.
 - **When they run:** workspace databases upgrade themselves when new code
   first runs. The shared database is upgraded before the release.
 - **Tested:** every upgrade runs in tests against a database built from

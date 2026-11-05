@@ -32,8 +32,20 @@ Applies to automated tests.
 
 - **One command:** use `bun run test`, which invokes Vitest in workerd.
   `bun test` uses Bun's own runner and does not run this Workers setup.
+- **Operator commands:** use `bun run test:cli` for setup-file and command-host
+  checks. File checks use disposable directories. The launcher check uses only
+  package metadata and a small TypeScript fixture. It copies no app source or
+  operator files and creates no remote bindings. Application tests stay in workerd.
 - **Shared helpers:** tests may import `#test/...` from `tests/support/`.
   This alias belongs to the test configuration; application code never imports it.
+- **Integration wiring:** root fixtures in `tests/support/` may import real app
+  server factories and helpers to compose integration tests. Keep those cross-app
+  imports there; module tests use `#test/...` and the module's own files. Fixtures
+  never substitute authentication or the implementation under test.
+- **Test-writing checkpoints:** when a task writes tests before implementation,
+  report the exact missing implementation and keep existing checks verified. Do
+  not hide the new failures with skips or fake implementations. Behaviour remains
+  unverified until the real implementation makes the new tests pass.
 - **Separate type checks:** application projects exclude test files. The root
   type-check command also generates test bindings and checks the test project.
 

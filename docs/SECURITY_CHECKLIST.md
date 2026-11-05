@@ -2,6 +2,9 @@
 
 Checked in code review for every change that touches sign-in, permissions or data.
 
+Feature evidence and outstanding privacy work are recorded in the
+[Sign-in and Accounts review](../specs/001-sign-in-and-accounts/checklists/security-review.md).
+
 - [ ] **Signed in is not enough:** every protected request follows the
       [shared access checks](../specs/001-sign-in-and-accounts/contracts/server-functions.md#access-checks),
       confirming a valid session, an active login with completed creation and

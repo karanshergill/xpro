@@ -1,0 +1,35 @@
+# Local credentials, certificates and runtime state.
+.env*
+.dev.vars*
+**/.env*
+**/.dev.vars*
+.certs/
+**/.wrangler/
+
+# Generated code, builds and test artifacts.
+node_modules/
+**/dist/
+**/dist-ssr/
+**/.tanstack/
+**/.output/
+**/paraglide/
+**/project.inlang/cache/
+**/project.inlang/README.md
+worker-runtime.d.ts
+**/worker-configuration.d.ts
+**/routeTree.gen.ts
+coverage/
+playwright-report/
+test-results/
+graphify-out/
+
+# Assistant packages, duplicate rule links and planning scaffolding.
+.agents/
+.claude/
+.codex/
+.specify/templates/
+
+# Temporary research and unapplied review artifacts.
+*.tmp.md
+*-review.diff
+readme-authoring-research.md

@@ -13,14 +13,18 @@
 - Valibot
 - Vite
 - Tailwind CSS v4 (styling, through its Vite plugin)
-- shadcn/ui (Base UI; components copied into our code; right-to-left ready)
-- react-image-crop (profile picture cropping)
+- shadcn/ui (Base UI; components copied into our code; right-to-left ready;
+  Button, AlertDialog and shared theme tokens live in @xpro/ui)
+- react-image-crop 11.1.2 (Hub square picture selection; bounded Canvas output
+  uses the existing private Images/R2 upload service)
+- qrcode.react 4.2.0 (Hub authenticator setup; browser-local SVG from Better Auth's native setup URI, with manual-key fallback)
 - Paraglide JS (translations)
 - barcode-detector (camera barcode scanning; its scanner file is served from
   our own address)
 
 ## Shared libraries
 - true-myth (named results for expected business outcomes)
+- cookie-es (server-only cookie parsing and serialization; Web Crypto encrypts private cookies)
 - uuid (IDs: UUID v7)
 - Dinero.js v2 (money) and big.js (other exact decimals)
 - temporal-polyfill (dates and time zones; always imported from
@@ -35,27 +39,34 @@
 - Cloudflare Workers
 - TanStack Start server functions/routes
 - Better Auth (email and password; native scrypt for password hashing;
-  username, admin, organization, JWT and OAuth provider add-ons; the Hub handles
+  username, admin, organization, two-factor, JWT and OAuth provider add-ons; the Hub handles
   sign-in and workspace membership. The Organization plugin manages who belongs
   to each workspace and who may manage its members; one organization per workspace)
+- @better-auth/core 1.7.12 (direct Hub reference to the existing native adapter
+  types and request-local endpoint context; no independent authentication runtime)
 - oauth4webapi (workspace apps finish sign-in through the Hub; certified
   OpenID Connect client)
+- jose (verifies signed Hub logout messages using Web Crypto)
 - AccessControl v3 (to confirm when planning Access control)
-- Cloudflare D1 (shared login details, workspace membership and the placement record)
+- Cloudflare D1 (shared login details, workspace membership and the prepared
+  workspace/address directory owned by STMS)
 - Kysely (kysely-durable-objects for Durable Objects, exact version pinned;
-  kysely-d1 for D1; built-in Migrator for migrations)
+  Better Auth's native Kysely adapter for D1 through Core's shared connection;
+  module-owned table views; built-in Migrator for migrations)
 - Cloudflare R2
 - Cloudflare Queues
 - Durable Objects (one per workspace; alarms for long workspace jobs)
 - Service Bindings
 - Cloudflare Workers for Platforms (one app per workspace, isolated mode)
 - Cloudflare Workflows (platform app only)
-- Cloudflare Workers KV (router's fast copy of the placement record)
+- Cloudflare Workers KV (router's fast copy of the placement record, filled
+  from the private Hub placement binding on a miss)
 - Cloudflare Workers Cache (per-app response caching)
 - Cloudflare for SaaS custom hostnames (clients' own addresses)
 
 ## Security
-- Cloudflare Turnstile (bot protection on the central sign-in page)
+- Cloudflare Turnstile (server verification through Better Auth's existing CAPTCHA
+  plugin; both sign-in methods require the Hub hostname and `sign-in` action)
 - Cloudflare Workers rate-limiting binding (one sign-in limit targeting 10 attempts
   per minute per normalized email or username; approximate, per Cloudflare location)
 - Cloudflare Secrets Store (beta)
@@ -74,9 +85,16 @@
 
 ## Tooling
 - Bun (including `bun audit` in the automatic checks)
+- tsx 4.23.15 (development tool; runs the hosted setup TypeScript command in
+  the existing Node.js tooling runtime)
 - Wrangler
 - Cloudflare Vite Plugin
+- Cloudflare API MCP (hosted OAuth connection for inspecting and managing Cloudflare
+  resources; permissions cover xpro's services; see [connection guide](./CLOUDFLARE_MCP.md))
 - mkcert 1.4.4 (local HTTPS certificates; development tool only)
+- Graphify CLI 0.9.97 (`graphifyy`, isolated Python development tool; static
+  code mapping and Codex-assisted documentation extraction; see
+  [Graphify guide](./GRAPHIFY.md))
 - Vitest
 - Istanbul coverage (@vitest/coverage-istanbul; Workers-compatible coverage)
 - Cloudflare Vitest Plugin (@cloudflare/vitest-plugin; tests run inside the
@@ -118,10 +136,13 @@ TypeScript entry; business actions are added by the later tasks.
 | Package | Exact version | Purpose |
 |---|---|---|
 | `better-auth`, `@better-auth/oauth-provider` | 1.7.12 | Hub authentication and OIDC provider; built-in username/Admin/Organization/JWT plugins |
+| `seroval` | 1.6.11 | Existing TanStack serializer, overridden to the patched version; direct development dependency for Workers security regressions |
 | `kysely` | 0.28.18 | Typed queries and migrations; one tested version across the workspace |
-| `kysely-d1` | 0.4.0 | Hub D1 dialect |
+| `@better-auth/kysely-adapter` | 1.7.12 | Native D1 queries, introspection and schema tooling |
 | `kysely-durable-objects` | 0.2.2 | Workspace SQLite dialect |
 | `oauth4webapi` | 3.8.8 | Workspace OIDC client |
+| `jose` | 6.2.13 | Signed Hub logout verification; already installed through Better Auth |
+| `cookie-es` | 3.1.1 | Server cookie parsing and serialization |
 | `valibot` | 1.5.0 | Input and profile validation |
 | `true-myth` | 9.4.0 | Named business results |
 | `uuid` | 14.0.3 | UUID v7 identifiers |
@@ -132,6 +153,7 @@ TypeScript entry; business actions are added by the later tasks.
 | `msw` | 3.0.3 | Outside-service HTTP/WebSocket test stubs |
 | `@msw/cloudflare` | 0.2.0 | MSW integration inside workerd |
 | `react`, `react-dom` | 19.3.0 | Existing web UI |
+| `qrcode.react` | 4.2.0 | Hub MFA setup QR as local SVG; React 19 peer and no additional runtime dependencies |
 | `@tanstack/react-start` | 1.168.60 | Patched server-function transport |
 | `@tanstack/react-router` | 1.170.41 | Router version used by the patched Start release |
 | `vite` | 8.3.5 | Patched build tooling; shared with the root test tools |
@@ -150,7 +172,15 @@ Each selected direct version and override cleared the waiting period; the
 minimum age also applies when resolving new transitive versions. Use
 `bun install --frozen-lockfile` in automatic checks.
 
-The root `kysely` override keeps Better Auth and both dialects on the tested
+T019 directly declares the already-installed `jose` 6.2.13 in the web app.
+Its official documentation supports Workers; its October 20 release clears the
+three-day waiting period. Native logout delivery in OAuth Provider 1.7.12 needs
+`patches/@better-auth%2Foauth-provider@1.7.12.patch`: workerd rejects
+`redirect: "error"`, so use `manual` and retain the native refusal of redirects.
+Remove that patch when upstream supplies equivalent Workers support. See
+[ADR-018](./adr/018-workspace-sessions-and-logout.md).
+
+The root `kysely` override keeps Better Auth and the workspace dialect on the tested
 0.28.18 version, which satisfies their declared ranges. Reassess it when moving
 the database stack to another tested Kysely version.
 
@@ -204,9 +234,87 @@ References: [Bun install settings](https://bun.sh/docs/runtime/bunfig),
 [MSW Cloudflare adapter](https://github.com/mswjs/cloudflare),
 and the packages' published npm manifests for release timestamps and peer ranges.
 
+T008 directly declares the already-installed `@better-auth/kysely-adapter`
+1.7.12 and removes `kysely-d1` 0.4.0. The latter delegates introspection to
+Kysely's generic SQLite introspector, which queries Cloudflare's protected
+internal tables and fails during migration. Better Auth's native D1
+introspector skips those tables and uses supported per-table queries.
+No additional transitive package or runtime was introduced. See
+[ADR-011](./adr/011-hub-auth-migrations.md).
+
 ## Later
 - Cloudflare Hyperdrive (external databases for large workspaces)
 - Mobile number with OTP, and Google login
 - Sentry (error and uptime alerts; free plan; set up before the first real
   client)
 - k6 (load testing; confirm before the first real client)
+
+Seroval 1.6.11 is pinned across the dependency tree after the 2026-10-29 audit
+reported five advisories against 1.6.7. Its upstream fixes cover malformed
+deserialization and generated-code injection. This patch release was published
+on 2026-10-18, beyond the three-day install waiting period. Workers regressions
+exercise the JSON decoder and safe generated output without evaluating code;
+the local HTTPS proof also checks TanStack Start’s real request decoder.
+
+Sources: [Seroval 1.6.11 release](https://github.com/lxsmnsyc/seroval/releases/tag/seroval%401.6.11),
+[malformed-node denial of service](https://github.com/advisories/GHSA-97r2-qh9m-474h),
+[overlapping array-length advisory](https://github.com/advisories/GHSA-wp97-x4hv-qvhp),
+[iterator-source validation](https://github.com/advisories/GHSA-7rv5-mrxv-xcr9),
+[RegExp output injection](https://github.com/advisories/GHSA-9wx9-5pv9-3349),
+[typed-array output injection](https://github.com/advisories/GHSA-f86p-h4j2-7qgj).
+
+## T016 screen dependency pins
+
+Verified on 2026-10-29 against the current official documentation, published npm
+manifests and actual local Workers/browser runs. All selected new versions clear
+the three-day waiting period; Bun still disables install scripts. The existing
+phone package is now also declared by the Hub for its country selector.
+
+| Package | Exact version | Purpose |
+|---|---|---|
+| `@base-ui/react` | 1.9.0 | Accessible button, input and checkbox primitives; copied shadcn controls stay in the Hub |
+| `@tanstack/react-form` | 1.33.5 | Form state, field blur/submit validation and submission status |
+| `class-variance-authority` | 0.7.1 | Used button/field variants |
+| `tailwind-merge` | 3.7.0 | Merge copied component classes |
+| `lucide-react` | 1.61.0 | Checkbox, select and working-state icons |
+| `libphonenumber-js` | 1.13.15 | Already approved phone package, directly declared for country/calling-code data |
+| `tailwindcss`, `@tailwindcss/vite` | 4.3.3 | Styling compiler and Hub Vite integration |
+| `@inlang/paraglide-js` | 2.29.1 | Local translation compiler and Vite integration |
+| `@inlang/plugin-message-format` | 4.5.5 | Pinned local message format plugin; compilation does not fetch a CDN plugin |
+| `@playwright/test` | 1.64.1 | Real Chromium screen regressions, in root development tooling |
+| `@axe-core/playwright` | 4.14.0 | Automated screen accessibility checks |
+
+Base UI/Form peers accept the existing React 19 pins; Tailwind's plugin accepts
+Vite 8; Paraglide accepts Vite 8 and TypeScript 6. Playwright and axe run only in
+Node tooling. Tailwind and Paraglide compilers also stay out of the Worker runtime;
+generated messages use the existing Node-compat async context support for SSR.
+The three app builds and real local HTTPS screen checks validate this boundary.
+
+The selected release dates are October 9 (Base UI), August 11 (Form), July 16
+(Tailwind), November 26, 2024 (CVA), September 12 (tailwind-merge), October 21
+(Lucide), October 19 (Paraglide), October 20 (message plugin), October 14
+(Playwright) and October 15 (axe). Versions that were too recent were not selected.
+No new backend framework, auth engine, Query provider or shared UI package is
+introduced for the first screen. Remaining planned frontend tools stay planned.
+
+See [ADR-032](./adr/032-profile-completion-screen.md),
+[shadcn Base UI](https://ui.shadcn.com/docs/components/base/button),
+[Form validation](https://tanstack.com/form/latest/docs/framework/react/guides/validation),
+[Paraglide](https://github.com/opral/paraglide-js),
+[Tailwind/Vite](https://tailwindcss.com/docs/installation/using-vite) and
+[Playwright accessibility](https://playwright.dev/docs/accessibility-testing).
+
+
+## Browser verification transport
+
+- **Dependency:** @mswjs/interceptors 0.45.9 is an exact root development
+  dependency, already resolved transitively through MSW. Its Web FetchInterceptor
+  stubs only the external Turnstile verification reply in the guarded browser
+  copy. Production app dependencies and Vite settings do not change.
+- **Runtime check:** the standalone Worker lacks BroadcastChannel, so it cannot
+  run MSW's full network coordinator. The smaller Web fetch interceptor runs
+  against the existing workerd compatibility settings and native auth tests.
+- **Release check:** version 0.45.9 was published on 2026-10-17, beyond the
+  three-day waiting period. No transitive version changes are introduced.
+
+Reference: [MSW fetch interception](https://github.com/mswjs/interceptors#fetchinterceptor).

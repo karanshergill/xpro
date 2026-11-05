@@ -8,10 +8,17 @@ paths:
 
 Applies to what users see: pages, components and styles.
 
+Read [DESIGN.md](../../DESIGN.md) for the visual baseline and its source
+references before changing a screen.
+
 ## Components and styling
 
 - **shadcn first:** screens use shadcn components (on Base UI) first. A
   custom component is built only when none fits.
+- **Shared pieces:** components and theme tokens actually used by both apps
+  live in @xpro/ui; feature-only controls stay with their app.
+- **Native links:** style anchors with the shared button variants when needed;
+  Base UI Button enforces button semantics and is not used for navigation links.
 - **Check before updating:** before updating a component from shadcn,
   compare it with ours first, because we may have changed our copy.
 - **Colours by name:** colours are used only through named design tokens,
@@ -55,6 +62,11 @@ Applies to what users see: pages, components and styles.
 
 ## Forms and fields
 
+- **Ready before use:** JavaScript-dependent forms keep controls disabled until
+  hydration and use a native POST method, so early interaction cannot lose input
+  or send it through a default GET navigation.
+- **Stable activation:** blur validation must not move a button during a pointer
+  press. Keep keyboard blur validation and recheck every field on submission.
 - **Check at the right time:** fields are checked when the user leaves
   them or submits the form, never while they are still typing.
 - **Nothing lost:** a form keeps everything the user entered when it
@@ -124,7 +136,10 @@ Applies to what users see: pages, components and styles.
   with the keyboard, with a visible focus outline.
 - **Focus after changes:** after moving to another page, focus goes to
   the new page's main heading; after a delete, it goes to the next
-  sensible item, never back to the top of the page.
+  sensible item, never back to the top of the page. Initial page-heading focus
+  uses `preventScroll`, so delayed hydration cannot move an in-progress pointer
+  press to a different target. Router restoration preserves the initial document
+  position and handles later client navigations.
 - **Big enough to tap:** anything clickable is at least 24 by 24 pixels.
 - **Errors stay:** error messages never disappear on their own; only
   success messages may fade.

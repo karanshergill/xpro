@@ -1,0 +1,10 @@
+{
+  "repository": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
+  "revision": "713eef51b04efc98d6fa565323b495f7c9c89fd4",
+  "path": ".claude/skills/ui-ux-pro-max",
+  "installedFor": "xpro",
+  "localChanges": [
+    "Replace Claude plugin path in CLI examples with <skill-dir>, resolved from the loaded Codex skill path."
+  ],
+  "upstreamSkillSha256": "1bdfb422c97d5e813768af422750882b71ff1554978da0b8a43c95de242765f7"
+}

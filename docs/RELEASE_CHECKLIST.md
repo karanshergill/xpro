@@ -1,5 +1,17 @@
 # Release checklist
 
+The [Sign-in and Accounts review](../specs/001-sign-in-and-accounts/checklists/release-review.md)
+retains **RELEASE BLOCKED**. Local implementation evidence is recorded in
+[T056](../specs/002-master-mfa/quickstart.md#t056-final-convergence-checkpoint),
+the [diagnostics checkpoint](../specs/003-error-diagnostics/quickstart.md) and
+[T061](../specs/005-flagship/quickstart.md#local-verification-t061).
+The later [T063 checkpoint](../specs/004-cloudflare-test/quickstart.md#hosted-verification-t063)
+records the completed hosted test journeys, picture controls, collector privacy
+and received test alert. Its scope and remaining requirements are explicit.
+T064 still needs evidence and approval for the actual production target and
+outstanding release gates. Production deployment and first-real-client approval
+remain withheld. This reusable checklist stays unchecked.
+
 ## Every release
 
 - [ ] Before anything changes, a dry-run build of every app succeeds and the

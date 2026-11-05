@@ -329,3 +329,11 @@
     matches, preserved bindings/storage and scoped smoke checks. The unintended
     suffixed Worker was removed through reviewed cleanup. CI use and production
     configuration/readiness remain outstanding; R06 stays partial and T064 open.
+  - **Manual CI preparation:** a reviewed-source proposal adds a GitHub Actions
+    workflow with preview as the default, audit/type/CLI/Workers checks and the
+    same native three-app release command. A separate `main` publication job uses
+    a protected `cloudflare-test` environment, owner-only prepared inputs and
+    safe-receipt retention. Local checks pass; environment protection/secrets,
+    the reviewed commit/push and first hosted preview/publication remain pending.
+    This does not complete R06 or T064. See the
+    [CI setup](../../docs/RELEASING.md#manual-github-actions-workflow).

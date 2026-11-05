@@ -29,6 +29,11 @@
   results afterward. Update receipts atomically. Stop on failure or an unusable
   acknowledgement and require operator inspection; do not automatically retry
   or roll back several Workers.
+- **CI:** use the already selected GitHub Actions service with manual preview
+  by default. Audit, typecheck, CLI/Workers tests and native preview run without
+  deployment secrets. Publication requires `main`, passing checks and the
+  separately configured `cloudflare-test` environment gate. It uses the same
+  command and prepared-input validation, pinned tools and safe-receipt retention.
 - **Boundary:** Hub SQL migrations, initial-master setup, placement publication,
   flags, production targets and CI connection keep their own reviewed steps.
   Workspace SQL upgrades remain automatic on startup. Their backward
@@ -39,6 +44,10 @@
 - **Plain deploy per app:** retains the wrong-target and incomplete-release risk.
 - **A deployment framework:** adds unnecessary machinery for the one prepared
   target. The command coordinates the existing tools without another dependency.
+- **Per-Worker hosted build triggers:** would add coordination for this ordered
+  three-Worker release. GitHub Actions already matches the selected stack and
+  can run the shared command without bypassing a connected Worker's identity
+  guard. This does not rule out Workers Builds for other release units.
 - **Automatic rollback:** cannot undo data changes or make several deployments
   atomic. Preserve known results for operator review instead.
 - **Release status:** local command tests and real packaging establish local
@@ -46,8 +55,9 @@
   stopped after creating an unintended suffixed Hub Worker. Reviewed cleanup
   removed it, and the [corrected test publication](../RELEASING.md#t064-corrected-test-publication-2026-11-05)
   passed native receipt, provider version/binding and scoped smoke checks.
-  R06 remains partial for CI and production; T064 and the production release
-  hold remain open.
+  The manual CI workflow is prepared and checked locally; its environment setup
+  and first hosted execution remain pending. R06 remains partial for CI and
+  production; T064 and the production release hold remain open.
 
 ## Verification
 
@@ -55,8 +65,10 @@
   private files, ordered publication, partial/uncertain results and cleanup.
 - **Real tools:** all three test apps pass native build/packaging preview with
   the pinned Vite/Wrangler setup. The full type workflow checks the command
-  through the CLI tests' imports.
+  through the CLI tests' imports. CI input tests cover matching identity, missing/
+  malformed inputs, private modes, existing-file preservation and launcher privacy.
 - **References:** [release runbook](../RELEASING.md),
   [Vite environments](https://developers.cloudflare.com/workers/vite-plugin/reference/cloudflare-environments/),
-  [Wrangler structured output](https://developers.cloudflare.com/workers/wrangler/system-environment-variables/)
+  [Wrangler structured output](https://developers.cloudflare.com/workers/wrangler/system-environment-variables/),
+  [Workers Builds monorepos](https://developers.cloudflare.com/workers/ci-cd/builds/advanced-setups/)
   and [rollback limits](https://developers.cloudflare.com/workers/versions-and-deployments/rollbacks/).

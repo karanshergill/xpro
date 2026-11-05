@@ -115,6 +115,23 @@
 - Faker (@faker-js/faker; test data, local development data and demo data
   only)
 
+## Release CI tool pins
+
+The manual test workflow uses GitHub-hosted Ubuntu 24.04. These tool versions
+match the locally checked release setup; they do not change the Workers runtime.
+Action references use full commit IDs with version comments in the
+[workflow](../.github/workflows/release-test.yml). Verified on 2026-11-05; all
+selected releases cleared the three-day waiting period. No package is added.
+
+| Tool | Exact version | Purpose |
+|---|---|---|
+| Node.js | 24.21.0 | Existing Vite, Wrangler and release-command host |
+| Bun | 1.4.4 | Frozen install and project scripts |
+| `actions/checkout` | 7.0.1 | Read the selected commit without persisting Git credentials |
+| `actions/setup-node` | 7.1.0 | Install the pinned Node host; automatic package caching disabled |
+| `oven-sh/setup-bun` | 2.2.0 | Install the pinned Bun version |
+| `actions/upload-artifact` | 7.0.2 | Retain only safe native release receipts for seven days |
+
 ## Sign-in foundation dependency pins
 
 Verified on 2026-10-25 with Bun 1.4.2 and Node.js 24.21.0. This first

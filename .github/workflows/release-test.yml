@@ -1,0 +1,92 @@
+name: Test release
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Preview the test release or request its publication
+        type: choice
+        default: preview
+        required: true
+        options:
+          - preview
+          - publish
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  WRANGLER_SEND_METRICS: "false"
+
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24.21.0"
+          package-manager-cache: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: "1.4.4"
+      - run: bun install --frozen-lockfile --ignore-scripts
+      - run: bun audit --audit-level=high
+      - run: bun run typecheck
+      - run: bun run test:cli
+      - run: bun run test
+      - name: Preview the complete test release
+        run: bun run release --env test
+
+  publish:
+    needs: checks
+    if: ${{ github.ref == 'refs/heads/main' && inputs.operation == 'publish' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: cloudflare-test
+    concurrency:
+      group: xpro-cloudflare-test-release
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24.21.0"
+          package-manager-cache: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: "1.4.4"
+      - run: bun install --frozen-lockfile --ignore-scripts
+      - name: Prepare protected test inputs
+        run: node --import tsx scripts/ci-release-inputs.ts
+        env:
+          XPRO_TEST_PREPARED_JSON: ${{ secrets.XPRO_TEST_PREPARED_JSON }}
+          XPRO_TEST_HUB_JSON: ${{ secrets.XPRO_TEST_HUB_JSON }}
+          XPRO_TEST_WORKSPACE_JSON: ${{ secrets.XPRO_TEST_WORKSPACE_JSON }}
+      - name: Publish the complete test release
+        run: bun run release --env test --publish
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - name: Retain the safe release receipt
+        if: ${{ always() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-release-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .cloudflare-test.local/release-*.json
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Remove copied private inputs
+        if: ${{ always() }}
+        run: rm -f -- .cloudflare-test.local/prepared.json .cloudflare-test.local/hub.json .cloudflare-test.local/workspace.json

@@ -61,6 +61,76 @@ reviewed steps. Workspace SQL upgrades still run on startup as designed; review
 their backward compatibility and any native Durable Object class lifecycle
 changes before publishing.
 
+## Manual GitHub Actions workflow
+
+[The workflow](../.github/workflows/release-test.yml) is started manually from
+GitHub's **Actions → Test release → Run workflow**. Its default operation is
+`preview`. There are no push, pull-request or scheduled deployment triggers.
+The workflow and release sources must first be reviewed, committed and pushed
+to `main`; GitHub lists manual workflows from the default branch. Preview can
+select another branch. Publication runs only from `main` and checks out the
+same commit that passed the checks.
+
+The `checks` job uses Ubuntu 24.04, Node.js 24.21.0 and Bun 1.4.4. It installs
+from the frozen lockfile with install scripts disabled, audits high/critical
+vulnerabilities, runs full typechecking, CLI tests and Workers tests, then calls
+`bun run release --env test`. It receives no deployment secrets. Browser journeys
+remain a separate check; this workflow does not run `test:e2e` or measure the
+release speed budget.
+
+Before the first `publish`, separately review and configure GitHub's
+`cloudflare-test` environment:
+
+1. Allow deployments only from `main`. Require the repository owner's review;
+   allow self-review for this single-operator project and disable administrator
+   bypass. Keep the environment's protection settings verified before use.
+2. Create a dedicated Cloudflare CI API token scoped to the recorded account.
+   Review Workers Scripts Write and the account/identity read access needed by
+   `wrangler whoami --json` (Account Settings Read, User Details Read and
+   Memberships Read). Existing D1/R2/KV bindings do not require permission to
+   mutate those resources directly. A Worker token is account-scoped; the
+   shared command's fixed test names do not narrow the token's platform rights.
+3. Add these four **environment secrets**, using the existing protected operator
+   files for the three JSON values. Do not copy values into source, chat or logs:
+
+   | Environment secret | Value source |
+   |---|---|
+   | `CLOUDFLARE_API_TOKEN` | Separately reviewed dedicated CI token |
+   | `XPRO_TEST_PREPARED_JSON` | Complete `.cloudflare-test.local/prepared.json` |
+   | `XPRO_TEST_HUB_JSON` | Complete `.cloudflare-test.local/hub.json` |
+   | `XPRO_TEST_WORKSPACE_JSON` | Complete `.cloudflare-test.local/workspace.json` |
+
+4. Run `preview` first and inspect its checks and selected commit. For an approved
+   test release, start `publish`, then approve that same commit at the environment
+   gate after its checks pass. Inspect the native receipt and provider state
+   afterward. This source change does not create the environment, token or secrets.
+
+The input helper creates owner-only files, uses the existing prepared-target
+validation and refuses an existing private directory. Only the input preparation
+step receives the three JSON secrets; only the publication step receives the
+API token. The publication job calls `bun run release --env test --publish` and
+serializes active test releases without cancelling the active one. GitHub may
+replace an older pending run; this is not a first-in, first-out release queue.
+
+The `test-release-<run>-<attempt>` artifact retains only safe `release-*.json`
+receipts for seven days. The hidden-file option enables that exact path, not the
+private directory as a whole. Cleanup attempts to remove only the three copied
+inputs; hosted runners are disposable. A cancelled job or failed artifact upload
+can follow an actual deployment. Inspect Cloudflare before retrying when the
+receipt is unavailable. No automatic retry, rollback, provisioning or production
+deployment is added.
+
+Local checks establish the source and command behavior only. The first hosted
+Ubuntu run, environment protections, dedicated token and CI publication remain
+unverified until that separate setup and execution are approved.
+
+References: [manual workflow runs](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow),
+[environment protection](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments),
+[environment availability](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments),
+[workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax),
+[secure Actions use](https://docs.github.com/en/actions/reference/security/secure-use)
+and [Cloudflare authorization](https://developers.cloudflare.com/workers/authorization/).
+
 ## Failure and cleanup
 
 A failure stops subsequent steps and returns `status: "failed"` with its `stage`
@@ -138,7 +208,8 @@ R06 stays partial and T064 remains open.
 checks, deployment order, uncertain outcomes and cleanup using synthetic operator
 files and stand-ins for external tools. The real preview also packages all three
 apps locally. Neither check proves remote publication, production behavior or CI.
-Run the same entrypoint from the chosen CI runner when that connection is approved.
+The manual workflow reuses that entrypoint. Its first hosted run and protected
+publication remain pending the setup and execution above.
 
 Forward migrations, an old/new code compatibility rehearsal, rollback artifacts,
 version reporting, production configuration and the remaining T064 requirements

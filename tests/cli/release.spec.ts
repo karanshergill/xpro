@@ -195,6 +195,29 @@ describe("release preview and publication", () => {
     expect(JSON.parse(receipt)).toMatchObject(JSON.parse(JSON.stringify(result)));
     expect(receipt).not.toContain(secret);
   });
+  it.each([
+    { name: "a provider refusal", code: 1, stderr: secret + "\n[code: 10000]\n[code: 10021]\n[code: 10000]\n[code: 999999999999999999999999999999999999]", expected: { exitCode: 1, cloudflareCodes: [10000, 10021] } },
+    { name: "an ordinary command failure", code: 2, stderr: secret, expected: { exitCode: 2, cloudflareCodes: [] } },
+    { name: "a spawn failure", code: secret, stderr: secret, expected: { exitCode: null, cloudflareCodes: [] } },
+    { name: "an invalid numeric exit code", code: Infinity, stderr: secret, expected: { exitCode: null, cloudflareCodes: [] } },
+  ])("when workspace publication has $name then only numeric diagnostics enter its partial receipt", async ({ code, stderr, expected }) => {
+    await prepareSecrets();
+    const run = async (command: ReleaseCommand): Promise<string> => {
+      if (command.args.includes("--strict") && command.args.includes("--dispatch-namespace")) {
+        throw Object.assign(new Error(secret), { code, stderr, stdout: secret });
+      }
+      return await externalTools(command);
+    };
+    const result = await runRelease({ root: directory, args: ["--env", "test", "--publish"], run });
+    expect(result).toEqual({ status: "failed", environment: "test", stage: "publish_web",
+      plan: expect.objectContaining({ accountId: CLOUDFLARE_TEST_TARGET.accountId }),
+      receipt: expect.stringMatching(/^\.cloudflare-test\.local\/release-[a-f0-9-]+\.json$/),
+      deployments: [{ app: "hub", worker: "xpro-hub-test", versionId: ids.hub }], failure: expected });
+    expect(published).toEqual(["hub"]);
+    const receipt = await readFile(join(directory, result.receipt ?? "missing"), "utf8");
+    expect(JSON.parse(receipt)).toEqual({ ...result, accountId: CLOUDFLARE_TEST_TARGET.accountId, recordedAt: expect.any(String) });
+    expect(receipt).not.toContain(secret);
+  });
   it("when authentication is for another account then no secret or deployment is used", async () => {
     const run = async (command: ReleaseCommand): Promise<string> => command.args.includes("whoami") ? JSON.stringify({ loggedIn: true, accounts: [{ id: "0".repeat(32) }] }) : await externalTools(command);
     expect(await runRelease({ root: directory, args: ["--env", "test", "--publish"], run })).toMatchObject({ status: "failed", stage: "account", deployments: [], receipt: null });

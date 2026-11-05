@@ -12,7 +12,8 @@ import { checkBuiltRelease, checkPackagedTarget, checkReleaseAccount, describeRe
 type Options = { environment: "test"; mode: "check" | "publish" };
 export type ReleaseCommand = { args: string[]; cwd: string; env: NodeJS.ProcessEnv };
 type Deployment = { app: string; worker: string; versionId: string };
-type Receipt = { status: "checked" | "publishing" | "published" | "failed"; environment: "test"; stage: string; plan: ReleasePlan | null; deployments: Deployment[]; receipt: string | null };
+type CommandFailure = { exitCode: number | null; cloudflareCodes: number[] };
+type Receipt = { status: "checked" | "publishing" | "published" | "failed"; environment: "test"; stage: string; plan: ReleasePlan | null; deployments: Deployment[]; receipt: string | null; failure?: CommandFailure };
 type ReleaseInput = { root: string; args: string[]; run: (command: ReleaseCommand) => Promise<string> };
 const executeFile = promisify(execFile);
 const usage = "Use bun run release --env test to preview, or add --publish for an approved test deployment.";
@@ -69,13 +70,23 @@ export async function runRelease({ root, args, run }: ReleaseInput): Promise<Rec
     result.status = "published"; result.stage = "complete";
     await saveReceipt(receipt, result);
     return result;
-  } catch {
+  } catch (error) {
     result.status = "failed";
+    const failure = readCommandFailure(error);
+    if (failure) result.failure = failure;
     if (receipt) await saveReceipt(receipt, result);
     return result;
   } finally {
     if (temporary) await rm(temporary, { recursive: true, force: true });
   }
+}
+
+function readCommandFailure(error: unknown): CommandFailure | null {
+  if (!(error instanceof Error) || !("stderr" in error) || typeof error.stderr !== "string") return null;
+  const exitCode = "code" in error && typeof error.code === "number" && Number.isSafeInteger(error.code) ? error.code : null;
+  // Child output can contain credentials; copy only the numeric diagnostics.
+  const cloudflareCodes = [...new Set(Array.from(error.stderr.matchAll(/\[code:\s*(\d+)\]/g), (match) => Number(match[1])).filter(Number.isSafeInteger))];
+  return { exitCode, cloudflareCodes };
 }
 
 function parseReleaseOptions(args: string[]): Options {

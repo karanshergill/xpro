@@ -120,9 +120,9 @@ can follow an actual deployment. Inspect Cloudflare before retrying when the
 receipt is unavailable. No automatic retry, rollback, provisioning or production
 deployment is added.
 
-Local checks establish the source and command behavior only. The first hosted
-Ubuntu run, environment protections, dedicated token and CI publication remain
-unverified until that separate setup and execution are approved.
+The first hosted preview passed on the approved commit. The environment and its
+four secrets are configured; the first protected publication stopped at the
+private workspace after publishing the Hub. See the CI checkpoint below.
 
 References: [manual workflow runs](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow),
 [environment protection](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments),
@@ -141,9 +141,11 @@ An interrupted receipt may remain `publishing`; treat that as requiring review.
 
 Receipts are updated atomically and contain safe identifiers and secret names.
 The command captures child output privately and removes its temporary bundles,
-Wrangler logs and secret snapshots after success or failure. It reports safe
-stage summaries rather than raw provider errors or credentials. Original
-operator files and release receipts remain in place.
+Wrangler logs and secret snapshots after success or failure. When a child command
+fails, its safe summary includes a nullable numeric exit code and deduplicated
+numeric Wrangler error codes as `failure`. Error text, arguments, stdout and
+stderr are never copied into that summary. Other failures retain the stage-only
+summary. Original operator files and release receipts remain in place.
 
 ## T064 test attempt: 2026-11-05
 
@@ -199,8 +201,45 @@ The native receipt is
 `.cloudflare-test.local/t064-corrected-test-publication.json` records the before/
 after readbacks, preserved storage identity and cleanup. Disposable source,
 builds, logs and copied secrets were removed; original operator files remain.
-CI verification and production configuration/readiness remain outstanding.
+CI publication and production configuration/readiness remain outstanding.
 R06 stays partial and T064 remains open.
+
+## T064 GitHub CI checkpoint: 2026-11-06
+
+Commit `92c935513faeaeda4ed0f12cf7a57c72f3242e1d` is on `main`.
+The [first hosted preview](https://github.com/karanshergill/xpro/actions/runs/42082460074)
+passed the frozen install, audit, full typecheck, 56 CLI tests, 2,226 Workers tests
+and three-app release preview. Its publication job was skipped as intended.
+
+GitHub's `cloudflare-test` environment allows only `main`, requires the owner as
+reviewer, permits self-review and disables administrator bypass. All four
+environment secrets are stored. The dedicated account-owned token was created
+with Workers Editor and Account Settings Read, scoped to the recorded account,
+with no expiry. It was transferred directly into GitHub; no token value was
+saved in the project. Account-owned token authentication passed
+`wrangler whoami --json` without user identity or membership permissions.
+
+The [first protected publication](https://github.com/karanshergill/xpro/actions/runs/42103868648)
+passed the same checks and waited for its required review. After the approved
+review, it published Hub version `cf71b954-d9dd-47f0-939c-5717e9717ac7`, then
+failed at `publish_web`. Cloudflare readback confirmed that the private workspace
+and router remained on their previous versions. All three Workers' bindings,
+runtime/privacy settings, workspace Durable Object namespace and disabled/paused
+picture policy were unchanged. The three HTTP smoke checks above passed again.
+
+The original command did not retain the underlying provider error, so the cause
+is unconfirmed. Cloudflare's [ordinary Worker authorization](https://developers.cloudflare.com/workers/authorization/workers/)
+and [Workers for Platforms upload reference](https://developers.cloudflare.com/api/resources/workers_for_platforms/subresources/dispatch/subresources/namespaces/subresources/scripts/methods/update/)
+list different accepted permissions; this is a hypothesis to verify, not approval
+to expand the token. No retry, rollback or permission change ran.
+The next approved diagnostic run must inspect its safe error codes and reconcile
+provider state before proposing a fix.
+
+The failed native receipt is
+`.cloudflare-test.local/release-1adf7d34-a2ac-4e61-b5e6-6caeaca45edf.json`.
+`.cloudflare-test.local/t064-ci-publication.json` records the run, artifact,
+partial provider readback and HTTP checks. The complete three-Worker CI release
+is still unverified; R06 stays partial and T064 remains open.
 
 ## Verification and remaining gates
 
@@ -208,8 +247,8 @@ R06 stays partial and T064 remains open.
 checks, deployment order, uncertain outcomes and cleanup using synthetic operator
 files and stand-ins for external tools. The real preview also packages all three
 apps locally. Neither check proves remote publication, production behavior or CI.
-The manual workflow reuses that entrypoint. Its first hosted run and protected
-publication remain pending the setup and execution above.
+The manual workflow reuses that entrypoint. Its hosted checks have passed; a
+complete protected publication remains pending after the partial attempt above.
 
 Forward migrations, an old/new code compatibility rehearsal, rollback artifacts,
 version reporting, production configuration and the remaining T064 requirements

@@ -3,7 +3,7 @@ import { runInDurableObject } from "cloudflare:test";
 import { err, ok } from "true-myth/result";
 import { v7 } from "uuid";
 import { describe, expect, it } from "vitest";
-import { createWorkspaceDatabase, createWorkspaceMigrator } from "#database/workspace.db";
+import { createWorkspaceDatabase, createWorkspaceMigrator } from "#database/workspace.db.ts";
 import { save } from "./save.db";
 
 type WorkspaceStub = ReturnType<typeof env.WORKSPACES.getByName>;

@@ -8,7 +8,7 @@ type InputOutput<Entries extends ObjectEntries> = InferOutput<StrictObjectSchema
 export function parseInput<const Entries extends ObjectEntries>(
   input: unknown,
   entries: Entries,
-): Result<InputOutput<Entries>, CoreError> {
+): Result<InputOutput<Entries>, Extract<CoreError, { code: "core_invalid_input" }>> {
   if (Array.isArray(input)) return err({ code: "core_invalid_input", fields: [] });
   const parsed = safeParse(strictObject(entries), input, { abortEarly: false, abortPipeEarly: false });
   if (parsed.success) return ok(parsed.output);
@@ -28,6 +28,30 @@ export async function readJsonInput<const Entries extends ObjectEntries>(
 ): Promise<Result<InputOutput<Entries>, CoreError>> {
   const contentType = request.headers.get("content-type")?.split(";")[0]?.trim().toLowerCase();
   if (contentType !== "application/json") return err({ code: "core_unsupported_media_type" });
+  const text = await readInputText(request);
+  if (text.isErr) return err(text.error);
+  let input: unknown;
+  try { input = JSON.parse(text.value); }
+  catch { return err({ code: "core_invalid_input", fields: [] }); }
+  return parseInput(input, entries);
+}
+
+export async function readFormInput<const Entries extends ObjectEntries>(request: Request,
+  entries: Entries): Promise<Result<InputOutput<Entries>, CoreError>> {
+  const contentType = request.headers.get("content-type")?.split(";")[0]?.trim().toLowerCase();
+  if (contentType !== "application/x-www-form-urlencoded") return err({ code: "core_unsupported_media_type" });
+  const text = await readInputText(request);
+  if (text.isErr) return err(text.error);
+  const parameters = new URLSearchParams(text.value);
+  const seen = new Set<string>();
+  for (const name of parameters.keys()) {
+    if (seen.has(name)) return err({ code: "core_invalid_input", fields: Object.hasOwn(entries, name) ? [name] : [] });
+    seen.add(name);
+  }
+  return parseInput(Object.fromEntries(parameters), entries);
+}
+
+export async function readInputText(request: Request): Promise<Result<string, CoreError>> {
   if (!request.body) return err({ code: "core_invalid_input", fields: [] });
 
   const reader = request.body.getReader();
@@ -35,7 +59,6 @@ export async function readJsonInput<const Entries extends ObjectEntries>(
   let readError: CoreError = { code: "core_invalid_input", fields: [] };
   let byteCount = 0;
   let text = "";
-  let input: unknown;
   try {
     while (true) {
       const { done, value } = await reader.read();
@@ -48,11 +71,10 @@ export async function readJsonInput<const Entries extends ObjectEntries>(
       }
       text += decoder.decode(value, { stream: true });
     }
-    input = JSON.parse(text + decoder.decode());
+    return ok(text + decoder.decode());
   } catch {
     return err(readError);
   } finally {
     reader.releaseLock();
   }
-  return parseInput(input, entries);
 }

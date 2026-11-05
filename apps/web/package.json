@@ -10,17 +10,23 @@
     "generate-routes": "tsr generate",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "bun run build && wrangler deploy",
+    "deploy": "bun run --cwd ../.. release",
     "generate-runtime-types": "wrangler types ../../worker-runtime.d.ts --include-env=false",
-    "generate-types": "wrangler types --env-interface WorkspaceEnv --include-runtime=false",
-    "typecheck": "tsc --noEmit"
+    "generate-types": "bun run generate-messages && wrangler types --config wrangler.jsonc --config ../hub/wrangler.jsonc --env-interface WorkspaceEnv --include-runtime=false",
+    "typecheck": "tsc --noEmit",
+    "generate-messages": "paraglide-js compile --project ./project.inlang --outdir ./src/paraglide --emit-ts-declarations --strategy cookie baseLocale"
   },
   "dependencies": {
+    "@xpro/core": "workspace:*",
     "@tanstack/react-router": "1.170.41",
     "@tanstack/react-start": "1.168.60",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "oauth4webapi": "3.8.8"
+    "oauth4webapi": "3.8.8",
+    "true-myth": "9.4.0",
+    "valibot": "1.5.0",
+    "jose": "6.2.13",
+    "@xpro/ui": "workspace:*"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.57.2",
@@ -31,6 +37,10 @@
     "@vitejs/plugin-react": "6.1.1",
     "typescript": "6.0.3",
     "vite": "8.3.5",
-    "wrangler": "4.136.2"
+    "wrangler": "4.136.2",
+    "tailwindcss": "4.3.3",
+    "@tailwindcss/vite": "4.3.3",
+    "@inlang/paraglide-js": "2.29.1",
+    "@inlang/plugin-message-format": "4.5.5"
   }
 }

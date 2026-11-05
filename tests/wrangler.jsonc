@@ -1,20 +1,33 @@
 {
   "$schema": "../node_modules/wrangler/config-schema.json",
   "name": "xpro-tests",
-  "main": "../apps/web/src/workspace/workspace.db.ts",
+  "main": "worker.ts",
+  "images": { "binding": "IMAGES", "remote": false },
+  "flagship": [
+    { "binding": "FLAGS", "app_id": "xpro-tests-local", "remote": false }
+  ],
   "compatibility_date": "2025-09-02",
   "compatibility_flags": [
     "nodejs_compat",
-    "unhandled_rejection_after_microtask_checkpoint"
+    "unhandled_rejection_after_microtask_checkpoint",
+    "enable_ctx_exports"
   ],
   "vars": {
-    "XPRO_TEST_ENVIRONMENT": "test"
+    "XPRO_TEST_ENVIRONMENT": "test",
+    "WORKSPACE_ID": "00000000-0000-4000-8000-000000000026"
   },
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "xpro-tests",
       "remote": false
+    }
+  ],
+  "ratelimits": [
+    {
+      "name": "SIGN_IN_RATE_LIMITER",
+      "namespace_id": "1002",
+      "simple": { "limit": 10, "period": 60 }
     }
   ],
   "r2_buckets": [
@@ -44,6 +57,26 @@
       "new_sqlite_classes": [
         "Workspace"
       ]
+    }
+  ],
+  "services": [
+    {
+      "binding": "WORKSPACE_USERS",
+      "service": "xpro-tests",
+      "entrypoint": "WorkspaceUserWriter",
+      "remote": false
+    },
+    {
+      "binding": "HUB_ACCESS",
+      "service": "xpro-tests",
+      "entrypoint": "HubAccess",
+      "remote": false
+    },
+    {
+      "binding": "HUB_PLACEMENT",
+      "service": "xpro-tests",
+      "entrypoint": "HubPlacement",
+      "remote": false
     }
   ]
 }

@@ -1,16 +1,22 @@
 {
   "name": "@xpro/stms",
   "private": true,
+  "sideEffects": false,
   "type": "module",
   "dependencies": {
     "@xpro/accounts": "workspace:*",
-    "@xpro/core": "workspace:*"
+    "@xpro/core": "workspace:*",
+    "kysely": "0.28.18",
+    "true-myth": "9.4.0",
+    "uuid": "14.0.3",
+    "valibot": "1.5.0"
   },
   "imports": {
     "#*": "./src/*"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./server": "./src/server/index.server.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

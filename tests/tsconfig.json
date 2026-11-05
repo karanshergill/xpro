@@ -23,5 +23,8 @@
     "../apps/*/src/**/*.test.tsx",
     "../apps/*/scripts/**/*.test.ts",
     "../apps/*/scripts/**/*.test.tsx"
+  ],
+  "exclude": [
+    "./e2e/**"
   ]
 }

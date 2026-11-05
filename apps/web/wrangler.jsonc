@@ -7,10 +7,20 @@
     "unhandled_rejection_after_microtask_checkpoint"
   ],
   "main": "src/server.ts",
+  "secrets": {
+    "required": ["WORKSPACE_ID", "WORKSPACE_ORIGINS", "HUB_ORIGIN",
+      "OIDC_CLIENT_ID", "OIDC_CLIENT_SECRET", "WORKSPACE_SESSION_SECRET"]
+  },
   "services": [
     {
       "binding": "HUB",
       "service": "xpro-hub",
+      "remote": false
+    },
+    {
+      "binding": "HUB_ACCESS",
+      "service": "xpro-hub",
+      "entrypoint": "HubAccess",
       "remote": false
     }
   ],
@@ -29,5 +39,42 @@
         "Workspace"
       ]
     }
-  ]
+  ],
+  "env": {
+    "test": {
+      "name": "xpro-test",
+      "account_id": "35ff2b49c05d63c1ab9be216933c774a",
+      "workers_dev": false,
+      "preview_urls": false,
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1,
+        "redact_query_string": true,
+        "logs": {
+          "enabled": true,
+          "head_sampling_rate": 1,
+          "invocation_logs": false,
+          "persist": true
+        },
+        "traces": {
+          "enabled": true,
+          "head_sampling_rate": 1,
+          "persist": true
+        },
+        "issues": {
+          "enabled": true
+        }
+      },
+      "vars": {
+        "HUB_ORIGIN": "https://xpro-hub-test.karanshergill.workers.dev",
+        "WORKSPACE_ORIGINS": "[\"https://xpro-router-test.karanshergill.workers.dev\"]"
+      },
+      "secrets": {"required": ["WORKSPACE_ID", "OIDC_CLIENT_ID", "OIDC_CLIENT_SECRET", "WORKSPACE_SESSION_SECRET"]},
+      "services": [
+        {"binding": "HUB", "service": "xpro-hub-test", "remote": false},
+        {"binding": "HUB_ACCESS", "service": "xpro-hub-test", "entrypoint": "HubAccess", "remote": false}
+      ],
+      "durable_objects": {"bindings": [{"name": "WORKSPACES", "class_name": "Workspace"}]}
+    }
+  }
 }

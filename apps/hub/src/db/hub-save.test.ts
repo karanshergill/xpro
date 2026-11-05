@@ -4,12 +4,12 @@ import { v7 } from "uuid";
 import { createHubDatabase, createHubMigrator } from "./hub.db";
 import { saveHub } from "./hub-save.db";
 
-type HubDatabase = ReturnType<typeof createHubDatabase>;
+type HubDatabase = Awaited<ReturnType<typeof createHubDatabase>>;
 type AuditEntry = ReturnType<typeof makeAuditEntry>;
 let db: HubDatabase;
 
-beforeEach(() => {
-  db = createHubDatabase(env.DB);
+beforeEach(async () => {
+  db = await createHubDatabase(env.DB);
 });
 afterEach(async () => {
   await db.destroy();

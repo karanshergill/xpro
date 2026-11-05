@@ -3,6 +3,8 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@better-auth/kysely-adapter": "1.7.12",
+    "cookie-es": "3.1.1",
     "kysely": "0.28.18",
     "kysely-durable-objects": "0.2.2",
     "temporal-polyfill": "1.0.6",

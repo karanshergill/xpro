@@ -1,14 +1,14 @@
 import { env } from "cloudflare:workers";
-import { Kysely, sql } from "kysely";
-import { D1Dialect } from "kysely-d1";
+import { sql } from "kysely";
+import { createHubDatabase } from "./hub.db";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { saveHub } from "./hub-save.db";
 
-let db: Kysely<never>;
+let db: Awaited<ReturnType<typeof createHubDatabase>>;
 const probeView = "core_save_probe";
 
-beforeEach(() => {
-  db = new Kysely<never>({ dialect: new D1Dialect({ database: env.DB }) });
+beforeEach(async () => {
+  db = await createHubDatabase(env.DB);
 });
 afterEach(async () => {
   await db.destroy();

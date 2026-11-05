@@ -10,17 +10,23 @@
     "dev": "bun --filter @xpro/web dev",
     "build": "bun --filter @xpro/web build",
     "preview": "bun --filter @xpro/web preview",
-    "deploy": "bun --filter @xpro/web deploy",
+    "deploy": "bun run release",
+    "release": "node --import tsx scripts/release.ts",
     "dev:hub": "bun --filter @xpro/hub dev",
     "dev:router": "bun --filter @xpro/router dev",
     "build:hub": "bun --filter @xpro/hub build",
     "build:router": "bun --filter @xpro/router build",
     "build:all": "bun run build && bun run build:hub && bun run build:router",
     "generate-types": "bun --filter @xpro/web generate-runtime-types && bun --filter @xpro/web generate-types && bun --filter @xpro/hub generate-types && bun --filter @xpro/router generate-types",
-    "typecheck": "bun run generate-types && bun --filter @xpro/hub generate-routes && bun --filter '@xpro/*' typecheck && bun run typecheck:tests",
-    "test": "vitest run",
+    "typecheck": "bun run generate-types && bun --filter @xpro/web generate-routes && bun --filter @xpro/hub generate-routes && bun --filter '@xpro/*' typecheck && bun run typecheck:tests && bun run typecheck:e2e",
+    "test": "bun --filter @xpro/hub generate-messages && bun --filter @xpro/web generate-messages && vitest run",
+    "test:cli": "vitest run --config tests/cli/vitest.config.ts",
     "generate-test-types": "wrangler types --config tests/wrangler.jsonc --env-interface TestEnv tests/worker-configuration.d.ts",
-    "typecheck:tests": "bun run generate-test-types && tsc --noEmit -p tests/tsconfig.json"
+    "typecheck:tests": "bun run generate-test-types && tsc --noEmit -p tests/tsconfig.json",
+    "test:e2e": "bun run tests/e2e/run.ts",
+    "typecheck:e2e": "tsc --noEmit -p tests/e2e/tsconfig.json",
+    "setup:cloudflare-test": "node --import tsx apps/hub/scripts/cloudflare-test.ts",
+    "test:e2e:install": "playwright install chromium"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "1.4.6",
@@ -28,13 +34,19 @@
     "vite": "8.3.5",
     "vitest": "4.1.12",
     "@msw/cloudflare": "0.2.0",
+    "@mswjs/interceptors": "0.45.9",
     "@types/node": "22.20.4",
     "msw": "3.0.3",
     "typescript": "6.0.3",
-    "wrangler": "4.136.2"
+    "tsx": "4.23.15",
+    "wrangler": "4.136.2",
+    "seroval": "1.6.11",
+    "@playwright/test": "1.64.1",
+    "@axe-core/playwright": "4.14.0"
   },
   "overrides": {
     "kysely": "0.28.18",
+    "seroval": "1.6.11",
     "sharp": "0.35.5",
     "source-map-js": "1.2.2",
     "undici": "7.30.1",
@@ -42,5 +54,8 @@
   },
   "imports": {
     "#test/*": "./tests/support/*"
+  },
+  "patchedDependencies": {
+    "@better-auth/oauth-provider@1.7.12": "patches/@better-auth%2Foauth-provider@1.7.12.patch"
   }
 }

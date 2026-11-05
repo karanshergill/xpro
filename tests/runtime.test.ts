@@ -20,6 +20,11 @@ describe("Workers test infrastructure", () => {
     expect(await runInDurableObject(first, async (_instance, state) => await state.storage.get("runtime_test"))).toBe("first");
   });
 
+  it("when a local Flagship flag is missing then the binding returns the JSON fallback", async () => {
+    const fallback = { canUpload: false };
+    expect(await env.FLAGS.getObjectValue("runtime_test", fallback)).toEqual(fallback);
+  });
+
   it("when KV is used then values can be saved and read", async () => {
     await env.PLACEMENTS.put("runtime_test", "placement");
     expect(await env.PLACEMENTS.get("runtime_test")).toBe("placement");

@@ -7,10 +7,20 @@
     "unhandled_rejection_after_microtask_checkpoint"
   ],
   "main": "src/router.server.ts",
+  "secrets": { "required": ["HUB_ORIGIN"] },
+  "dispatch_namespaces": [
+    { "binding": "DISPATCHER", "namespace": "xpro-workspaces", "remote": false }
+  ],
   "services": [
     {
       "binding": "HUB",
       "service": "xpro-hub",
+      "remote": false
+    },
+    {
+      "binding": "HUB_PLACEMENT",
+      "service": "xpro-hub",
+      "entrypoint": "HubPlacement",
       "remote": false
     }
   ],
@@ -19,5 +29,58 @@
       "binding": "PLACEMENTS",
       "remote": false
     }
-  ]
+  ],
+  "env": {
+    "local": {
+      "name": "xpro-router",
+      "main": "src/local.server.ts",
+      "secrets": { "required": ["HUB_ORIGIN"] },
+      "dispatch_namespaces": [],
+      "services": [
+        { "binding": "HUB", "service": "xpro-hub", "remote": false },
+        { "binding": "HUB_PLACEMENT", "service": "xpro-hub", "entrypoint": "HubPlacement", "remote": false },
+        { "binding": "LOCAL_WORKSPACE", "service": "xpro", "remote": false }
+      ],
+      "kv_namespaces": [{ "binding": "PLACEMENTS", "remote": false }]
+    },
+    "test": {
+      "name": "xpro-router-test",
+      "account_id": "35ff2b49c05d63c1ab9be216933c774a",
+      "workers_dev": true,
+      "preview_urls": false,
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1,
+        "redact_query_string": true,
+        "logs": {
+          "enabled": true,
+          "head_sampling_rate": 1,
+          "invocation_logs": false,
+          "persist": true
+        },
+        "traces": {
+          "enabled": true,
+          "head_sampling_rate": 1,
+          "persist": true
+        },
+        "issues": {
+          "enabled": true
+        }
+      },
+      "vars": {
+        "HUB_ORIGIN": "https://xpro-hub-test.karanshergill.workers.dev"
+      },
+      "secrets": {"required": []},
+      "dispatch_namespaces": [
+        {"binding": "DISPATCHER", "namespace": "xpro-workspaces-test", "remote": false}
+      ],
+      "services": [
+        {"binding": "HUB", "service": "xpro-hub-test", "remote": false},
+        {"binding": "HUB_PLACEMENT", "service": "xpro-hub-test", "entrypoint": "HubPlacement", "remote": false}
+      ],
+      "kv_namespaces": [
+        {"binding": "PLACEMENTS", "id": "52c196caafa54a7aa333318c8031dbba", "remote": false}
+      ]
+    }
+  }
 }

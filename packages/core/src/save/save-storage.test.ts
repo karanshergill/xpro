@@ -1,13 +1,13 @@
 import { env } from "cloudflare:workers";
 import { runInDurableObject } from "cloudflare:test";
-import { Kysely, sql } from "kysely";
-import { DurableObjectSqliteDialect, type SqlStorage as DialectSqlStorage } from "kysely-durable-objects";
+import { sql } from "kysely";
+import { createWorkspaceDatabase } from "#database/workspace.db.ts";
 import { err, ok } from "true-myth/result";
 import { describe, expect, it } from "vitest";
 import { save } from "./save.db";
 
 type WorkspaceStub = ReturnType<typeof env.WORKSPACES.getByName>;
-type StorageContext = { db: Kysely<never>; storage: DurableObjectStorage };
+type StorageContext = { db: ReturnType<typeof createWorkspaceDatabase>; storage: DurableObjectStorage };
 const probeView = "core_save_probe";
 
 // A disposable view exercises SQL atomicity independently of application migrations.
@@ -85,9 +85,7 @@ describe("workspace storage transactions", () => {
 
 async function runInStorage<Value>(workspace: WorkspaceStub, run: (context: StorageContext) => Promise<Value>): Promise<Value> {
   return await runInDurableObject(workspace, async (_instance, state) => {
-    // shortcut: 0.2.2 declares exec<T> without the platform's record constraint.
-    // Remove this assertion when the dialect publishes matching storage types.
-    const db = new Kysely<never>({ dialect: new DurableObjectSqliteDialect(state.storage.sql as DialectSqlStorage) });
+    const db = createWorkspaceDatabase(state.storage.sql);
     try {
       return await run({ db, storage: state.storage });
     } finally {

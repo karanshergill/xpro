@@ -1,0 +1,9 @@
+diff --git a/dist/authorize-D_jy3s-1.mjs b/dist/authorize-D_jy3s-1.mjs
+index e57ce0d..103d64d 100644
+--- a/dist/authorize-D_jy3s-1.mjs
++++ b/dist/authorize-D_jy3s-1.mjs
+@@ -338 +338,3 @@ async function deliverBackchannelLogoutTokens(ctx, plan) {
+-				redirect: "error"
++				// shortcut: workerd rejects redirect: "error". Remove this patch when
++				// the provider supports refusing redirects on workerd without it.
++				redirect: "manual"

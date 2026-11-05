@@ -2,11 +2,6 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "jsx": "react-jsx",
-    "paths": {
-      "#*": [
-        "./src/*"
-      ]
-    },
     "lib": [
       "ES2022",
       "DOM",
@@ -17,7 +12,12 @@
       "node",
       "../../worker-runtime.d.ts",
       "./worker-configuration.d.ts"
-    ]
+    ],
+    "paths": {
+      "#*": [
+        "./src/*"
+      ]
+    }
   },
   "include": [
     "src/**/*.ts",

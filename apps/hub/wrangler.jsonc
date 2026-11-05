@@ -6,7 +6,21 @@
     "nodejs_compat",
     "unhandled_rejection_after_microtask_checkpoint"
   ],
-  "main": "@tanstack/react-start/server-entry",
+  "main": "src/server.ts",
+  "images": { "binding": "IMAGES", "remote": false },
+  "dispatch_namespaces": [
+    { "binding": "DISPATCHER", "namespace": "xpro-workspaces", "remote": false }
+  ],
+  "secrets": {
+    "required": ["BETTER_AUTH_URL", "BETTER_AUTH_SECRET", "TURNSTILE_SECRET_KEY", "TURNSTILE_SITE_KEY"]
+  },
+  "ratelimits": [
+    {
+      "name": "SIGN_IN_RATE_LIMITER",
+      "namespace_id": "1001",
+      "simple": { "limit": 10, "period": 60 }
+    }
+  ],
   "d1_databases": [
     {
       "binding": "DB",
@@ -20,5 +34,75 @@
       "bucket_name": "xpro-profile-pictures",
       "remote": false
     }
-  ]
+  ],
+  "env": {
+    "local": {
+      "name": "xpro-hub",
+      "secrets": {
+        "required": ["BETTER_AUTH_URL", "BETTER_AUTH_SECRET", "TURNSTILE_SECRET_KEY", "TURNSTILE_SITE_KEY"]
+      },
+      "dispatch_namespaces": [],
+      "images": { "binding": "IMAGES", "remote": false },
+      "flagship": [
+        { "binding": "FLAGS", "app_id": "xpro-hub-local", "remote": false }
+      ],
+      "services": [
+        { "binding": "WORKSPACE_USERS", "service": "xpro", "entrypoint": "WorkspaceUserWriter", "remote": false }
+      ],
+      "d1_databases": [
+        { "binding": "DB", "database_name": "xpro-hub", "remote": false }
+      ],
+      "r2_buckets": [
+        { "binding": "PROFILE_PICTURES", "bucket_name": "xpro-profile-pictures", "remote": false }
+      ],
+      "ratelimits": [
+        { "name": "SIGN_IN_RATE_LIMITER", "namespace_id": "1001", "simple": { "limit": 10, "period": 60 } }
+      ]
+    },
+    "test": {
+      "name": "xpro-hub-test",
+      "account_id": "35ff2b49c05d63c1ab9be216933c774a",
+      "workers_dev": true,
+      "preview_urls": false,
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1,
+        "redact_query_string": true,
+        "logs": {
+          "enabled": true,
+          "head_sampling_rate": 1,
+          "invocation_logs": false,
+          "persist": true
+        },
+        "traces": {
+          "enabled": true,
+          "head_sampling_rate": 1,
+          "persist": true
+        },
+        "issues": {
+          "enabled": true
+        }
+      },
+      "vars": {
+        "BETTER_AUTH_URL": "https://xpro-hub-test.karanshergill.workers.dev"
+      },
+      "secrets": {"required": ["BETTER_AUTH_SECRET", "TURNSTILE_SECRET_KEY", "TURNSTILE_SITE_KEY"]},
+      "dispatch_namespaces": [
+        {"binding": "DISPATCHER", "namespace": "xpro-workspaces-test", "remote": false}
+      ],
+      "images": {"binding": "IMAGES", "remote": false},
+      "flagship": [
+        {"binding": "FLAGS", "app_id": "d6054b12-d093-4d58-b5ef-7ca8e03bac3e", "remote": false}
+      ],
+      "d1_databases": [
+        {"binding": "DB", "database_name": "xpro-hub-test", "database_id": "28f995c1-9c2f-4dfa-b050-86ee0baf73bf", "remote": false}
+      ],
+      "r2_buckets": [
+        {"binding": "PROFILE_PICTURES", "bucket_name": "xpro-profile-pictures-test", "remote": false}
+      ],
+      "ratelimits": [
+        {"name": "SIGN_IN_RATE_LIMITER", "namespace_id": "1004", "simple": {"limit": 10, "period": 60}}
+      ]
+    }
+  }
 }

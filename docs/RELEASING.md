@@ -84,12 +84,16 @@ Before the first `publish`, separately review and configure GitHub's
 1. Allow deployments only from `main`. Require the repository owner's review;
    allow self-review for this single-operator project and disable administrator
    bypass. Keep the environment's protection settings verified before use.
-2. Create a dedicated Cloudflare CI API token scoped to the recorded account.
-   Review Workers Scripts Write and the account/identity read access needed by
-   `wrangler whoami --json` (Account Settings Read, User Details Read and
-   Memberships Read). Existing D1/R2/KV bindings do not require permission to
-   mutate those resources directly. A Worker token is account-scoped; the
-   shared command's fixed test names do not narrow the token's platform rights.
+2. Create a dedicated account-owned Cloudflare CI token for the recorded account.
+   Review permissions for ordinary Workers and Workers for Platforms separately:
+   the [private script upload API](https://developers.cloudflare.com/api/resources/workers_for_platforms/subresources/dispatch/subresources/namespaces/subresources/scripts/methods/update/)
+   lists Workers Scripts Write. The original Workers Editor and Account Settings
+   Read account token passed `wrangler whoami --json` without user identity or
+   membership permissions.
+   Existing D1/R2/KV bindings do not require direct resource-write permissions.
+   The current token's separately approved full account/domain policy is recorded
+   in the [verified CI checkpoint](#t064-verified-ci-publication-2026-11-06).
+   The shared command's fixed test names do not narrow the token's platform rights.
 3. Add these four **environment secrets**, using the existing protected operator
    files for the three JSON values. Do not copy values into source, chat or logs:
 
@@ -120,9 +124,9 @@ can follow an actual deployment. Inspect Cloudflare before retrying when the
 receipt is unavailable. No automatic retry, rollback, provisioning or production
 deployment is added.
 
-The first hosted preview passed on the approved commit. The environment and its
-four secrets are configured; the first protected publication stopped at the
-private workspace after publishing the Hub. See the CI checkpoint below.
+The environment and its four secrets are configured. Hosted preview and complete
+protected publication have passed; the [verified CI checkpoint](#t064-verified-ci-publication-2026-11-06)
+records the source, checks, deployed versions and remaining production limits.
 
 References: [manual workflow runs](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow),
 [environment protection](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments),
@@ -201,15 +205,16 @@ The native receipt is
 `.cloudflare-test.local/t064-corrected-test-publication.json` records the before/
 after readbacks, preserved storage identity and cleanup. Disposable source,
 builds, logs and copied secrets were removed; original operator files remain.
-CI publication and production configuration/readiness remain outstanding.
-R06 stays partial and T064 remains open.
+At this 2026-11-05 checkpoint, CI publication and production readiness were
+outstanding. The later CI publication is recorded below; production readiness
+keeps R06 partial and T064 open.
 
 ## T064 GitHub CI checkpoint: 2026-11-06
 
-Commit `92c935513faeaeda4ed0f12cf7a57c72f3242e1d` is on `main`.
 The [first hosted preview](https://github.com/karanshergill/xpro/actions/runs/42082460074)
-passed the frozen install, audit, full typecheck, 56 CLI tests, 2,226 Workers tests
-and three-app release preview. Its publication job was skipped as intended.
+used commit `92c935513faeaeda4ed0f12cf7a57c72f3242e1d` and passed the frozen
+install, audit, full typecheck, 56 CLI tests, 2,226 Workers tests and three-app
+release preview. Its publication job was skipped as intended.
 
 GitHub's `cloudflare-test` environment allows only `main`, requires the owner as
 reviewer, permits self-review and disables administrator bypass. All four
@@ -227,28 +232,71 @@ and router remained on their previous versions. All three Workers' bindings,
 runtime/privacy settings, workspace Durable Object namespace and disabled/paused
 picture policy were unchanged. The three HTTP smoke checks above passed again.
 
-The original command did not retain the underlying provider error, so the cause
-is unconfirmed. Cloudflare's [ordinary Worker authorization](https://developers.cloudflare.com/workers/authorization/workers/)
+The original command did not retain the underlying provider error, so its cause
+was unconfirmed at that checkpoint. Cloudflare's [ordinary Worker authorization](https://developers.cloudflare.com/workers/authorization/workers/)
 and [Workers for Platforms upload reference](https://developers.cloudflare.com/api/resources/workers_for_platforms/subresources/dispatch/subresources/namespaces/subresources/scripts/methods/update/)
-list different accepted permissions; this is a hypothesis to verify, not approval
-to expand the token. No retry, rollback or permission change ran.
-The next approved diagnostic run must inspect its safe error codes and reconcile
-provider state before proposing a fix.
+list different accepted permissions. The subsequent diagnostic and separately
+approved permission change are recorded below.
 
 The failed native receipt is
 `.cloudflare-test.local/release-1adf7d34-a2ac-4e61-b5e6-6caeaca45edf.json`.
 `.cloudflare-test.local/t064-ci-publication.json` records the run, artifact,
-partial provider readback and HTTP checks. The complete three-Worker CI release
-is still unverified; R06 stays partial and T064 remains open.
+partial provider readback and HTTP checks. The later successful CI release
+retains these earlier failure records.
+
+## T064 verified CI publication: 2026-11-06
+
+The [first two-request diagnostic](https://github.com/karanshergill/xpro/actions/runs/42178389489/attempts/1)
+received 200 for workspace metadata and 403 for starting its asset-upload session.
+After explicit approval, the existing account-owned CI token was expanded to all
+386 permissions available in the selected scopes: 290 for the entire recorded
+account and 96 for all its domains. Its no-expiry and all-IP settings stayed in
+place. The token value and protected GitHub secret were unchanged. The
+[second diagnostic](https://github.com/karanshergill/xpro/actions/runs/42178389489/attempts/2)
+received 200 for both requests.
+
+The [complete CI release rerun](https://github.com/karanshergill/xpro/actions/runs/42167918698/attempts/2)
+published reviewed commit `99b651d0ff95557b9ea79441aa36a188a57390df` after its
+frozen install, high/critical dependency audit, full typecheck, 61 CLI tests in
+five files, 2,226 Workers tests in 118 files and three-app preview passed.
+Publication waited for the required owner's review and used the shared command
+in Hub, private workspace, router order.
+
+| Worker | Published version |
+|---|---|
+| `xpro-hub-test` | `3b3e60d3-9379-478c-aa5d-39104865529d` |
+| `xpro-test` | `cc56cc12-7460-4a1c-b819-6aa542673de2` |
+| `xpro-router-test` | `d73eac92-4d11-4457-bc4c-b884f0d300a4` |
+
+Cloudflare matched all three native receipt IDs. The Hub and router serve their
+recorded versions at 100%; `xpro-test` remains private in `xpro-workspaces-test`.
+Bindings, runtime/privacy settings, the workspace Durable Object namespace and
+the disabled/paused picture policy were unchanged. The unintended
+`xpro-hub-test-test` Worker remained absent.
+
+All three HTTP checks passed with no-store caching and frame-denial headers:
+Hub sign-in 200, workspace navigation 302 to `/auth/start`, and an unauthenticated
+JSON request 401. The permanent Workers suite ran under `workerd` on the GitHub
+runner. Remote verification covered provider readback and these HTTP responses;
+authenticated-journey evidence remains the separate T063 checkpoint.
+
+Artifact `test-release-42167918698-2` contains the native receipt, retained locally
+as `.cloudflare-test.local/release-addf051f-0c5b-4585-8039-8819c35589a7.json`.
+`.cloudflare-test.local/t064-ci-full-access-release.json` records the required
+review, before/after provider and HTTP checks, test totals and cleanup. The runner's
+private-input cleanup passed; no local helpers, raw logs or download archives
+were retained. Original operator files remain unchanged. The temporary diagnostic
+workflow stays removed, and its rerun required no repository change.
 
 ## Verification and remaining gates
 
 `bun run test:cli` covers target refusals, actual Bun/Node launchers, private-file
 checks, deployment order, uncertain outcomes and cleanup using synthetic operator
-files and stand-ins for external tools. The real preview also packages all three
-apps locally. Neither check proves remote publication, production behavior or CI.
-The manual workflow reuses that entrypoint. Its hosted checks have passed; a
-complete protected publication remains pending after the partial attempt above.
+files and stand-ins for external tools. The real preview packages all three apps.
+The corrected operator-run publication and the protected GitHub Actions publication
+separately verified the actual test target through native receipts, provider
+readback and scoped HTTP checks. Local and CI use of the shared test command is
+verified. R06 stays partial for production configuration; T064 remains open.
 
 Forward migrations, an old/new code compatibility rehearsal, rollback artifacts,
 version reporting, production configuration and the remaining T064 requirements

@@ -12,7 +12,9 @@
   The [T061 Flagship checkpoint](../../005-flagship/quickstart.md#local-verification-t061)
   adds local native picture-upload controls and fresh candidate verification.
   The [T063 checkpoint](../../004-cloudflare-test/quickstart.md#hosted-verification-t063)
-  adds completed hosted test evidence on 2026-11-05; T064 remains open.
+  adds completed hosted test evidence on 2026-11-05. The
+  [T064 CI checkpoint](../../../docs/RELEASING.md#t064-verified-ci-publication-2026-11-06)
+  adds verified protected test publication on 2026-11-06; T064 remains open.
 - **Meaning:** completing T045 records the review, not completion of the release
   checklist or full feature acceptance. Its unchecked requirements remain open.
   Approval of this report authorises documentation only.
@@ -30,7 +32,8 @@
   and private partial receipts. Its [corrected test publication](../../../docs/RELEASING.md#t064-corrected-test-publication-2026-11-05)
   passed in the reviewed Hub/private workspace/router order, with matching
   native/provider version IDs, preserved bindings and scoped smoke checks.
-  CI use remains unverified. Choose and verify the production target/resources,
+  The protected CI publication now verifies the same command against the test
+  target. Choose and verify the production target/resources,
   rollout/rollback versions and migration procedure before release approval.
 - **Hosted acceptance:** T063 verified the declared native identity, routing,
   staff-creation, revocation and picture-control journeys. Production hostnames
@@ -54,12 +57,12 @@ exists while at least one requirement or target remains unverified.
 | ID | Requirement | Assessment |
 |---|---|---|
 | R01 | Dry-run every app and confirm account | Test target verified. T063 confirmed the fixed account, packaged all three targets and read back the deployments/bindings. Repeat pre-release checks against the actual production target. |
-| R02 | Checks pass on Cloudflare test environment | Verified for T063's declared hosted journeys; its checkpoint records scope and image-boundary limits. Broader image fidelity, asset/edge policies and release-target performance remain open. The full permanent suite remains dated local evidence. |
+| R02 | Checks pass on Cloudflare test environment | T063 verifies the declared hosted journeys and records image-boundary limits. T064's protected CI run adds 61 CLI tests, 2,226 Workers-runtime tests, full typechecking and three-app preview on the GitHub runner, followed by scoped live HTTP checks. Broader image fidelity, asset/edge policies and release-target performance remain open. |
 | R03 | Forward migrations and old-code compatibility | Partial. Real migration/rollback/startup tests pass locally; Hub migrations run serially and workspace upgrades are transactional. No deployed old/new release pair was tested. Retain the search name-copy rollback restriction in [ADR-028](../../../docs/adr/028-indexed-master-login-reads.md). |
-| R04 | Known rollback version | Partial. T063 recorded test deployment references. A production rollback version, compatible old/new release pair and identified release/tag remain unverified. |
+| R04 | Known rollback version | Partial. T063 and T064 record test deployment references; the CI checkpoint retains before/after provider IDs. A production rollback version, compatible old/new release pair and identified release/tag remain unverified. |
 | R05 | Hub-first staged rollout | Test sequence verified: Hub, private workspace, router, then placement publication. Production cohorts and rollout evidence remain open. |
-| R06 | One named-environment deploy path, local and CI | Partial. The shared Node-hosted command requires the reviewed test environment, previews all three apps and coordinates guarded publication with private partial receipts. CLI tests and native local packaging pass with corrected environment handling and native dry-run target checks. The corrected command published all three intended test Workers in the reviewed order; native/provider version readback, preserved bindings and scoped smoke checks passed. Chosen CI-runner evidence and production configuration remain outstanding. |
-| R07 | Live reported version matches release | Partial. T063 recorded test deployment references; the corrected T064 publication additionally matched all three native receipt IDs against provider state. An application release-version endpoint/binding and production release match remain unimplemented/unverified. |
+| R06 | One named-environment deploy path, local and CI | Partial for production. The shared Node-hosted command requires a named test environment, checks all three targets and publishes in Hub/private workspace/router order. Operator-run publication and protected GitHub Actions publication are verified, including full checks, native/provider version matches, preserved bindings/storage and scoped HTTP checks. Production target configuration and release verification remain outstanding. |
+| R07 | Live reported version matches release | Partial. T063 records test deployment references; T064's operator-run and CI publications match all three native receipt IDs against provider state. An application release-version endpoint/binding and production release match remain unimplemented/unverified. |
 | R08 | New features behind flags, default off | Partial. T063 verified the native hosted picture policy, pilot targeting, displayed limits, server pause, invalid fallback and exact paused restoration. Production configuration and the remaining mapped controls still belong to their approved owning features. |
 | R09 | Workspace versions reported and visible in STMS | Not implemented in these screens; STMS currently manages logins, not deployment versions. |
 | R10 | No secrets in Git | Partial. No private environment/certificate paths are tracked; developer private files remain ignored and preserved. No installed secret scanner was available, and full history/release-artifact scanning was not performed. Do not claim a complete secret scan. |
@@ -158,6 +161,14 @@ active occurrences; each states both its limit and an upgrade trigger.
   collector privacy/retention and one owner-received automatic alert. The flag
   was restored and temporary alert resources removed. This is test-target
   evidence; the production release gates above remain open.
+- **CI publication:** the [T064 checkpoint](../../../docs/RELEASING.md#t064-verified-ci-publication-2026-11-06)
+  records the protected rerun of reviewed commit `99b651d0ff95557b9ea79441aa36a188a57390df`:
+  frozen install, audit, full typecheck, 61 CLI tests, 2,226 Workers tests and
+  three-app preview passed before owner review released publication. Native
+  receipt/provider versions and all three HTTP checks matched; bindings, storage
+  identity and the paused policy were preserved. CI runtime tests and scoped
+  hosted checks do not supply production, browser or performance acceptance.
+  Original operator files remain; safe evidence is retained and raw logs are not.
 - **Deployment reference:** [Wrangler environments](https://developers.cloudflare.com/workers/wrangler/environments/)
   define environment selection. T063 records the approved test procedure; R06
   still requires a shared production release workflow.

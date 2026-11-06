@@ -55,9 +55,10 @@
   stopped after creating an unintended suffixed Hub Worker. Reviewed cleanup
   removed it, and the [corrected test publication](../RELEASING.md#t064-corrected-test-publication-2026-11-05)
   passed native receipt, provider version/binding and scoped smoke checks.
-  The manual CI workflow is prepared and checked locally; its environment setup
-  and first hosted execution remain pending. R06 remains partial for CI and
-  production; T064 and the production release hold remain open.
+  The [protected GitHub Actions publication](../RELEASING.md#t064-verified-ci-publication-2026-11-06)
+  now passes the full checks and shared command, with all three native/provider
+  versions and scoped HTTP responses verified. R06 remains partial for production
+  configuration; T064 and the production release hold remain open.
 
 ## Verification
 

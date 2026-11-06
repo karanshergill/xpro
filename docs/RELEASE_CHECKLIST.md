@@ -8,6 +8,9 @@ the [diagnostics checkpoint](../specs/003-error-diagnostics/quickstart.md) and
 The later [T063 checkpoint](../specs/004-cloudflare-test/quickstart.md#hosted-verification-t063)
 records the completed hosted test journeys, picture controls, collector privacy
 and received test alert. Its scope and remaining requirements are explicit.
+The [T064 CI checkpoint](RELEASING.md#t064-verified-ci-publication-2026-11-06) adds
+verified protected GitHub Actions publication of all three test Workers through
+the shared command, with matching provider versions and HTTP checks.
 T064 still needs evidence and approval for the actual production target and
 outstanding release gates. Production deployment and first-real-client approval
 remain withheld. This reusable checklist stays unchecked.

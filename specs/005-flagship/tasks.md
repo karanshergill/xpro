@@ -327,13 +327,19 @@
     [corrected controlled publication](../../docs/RELEASING.md#t064-corrected-test-publication-2026-11-05)
     passed in Hub/private workspace/router order, with native/provider version
     matches, preserved bindings/storage and scoped smoke checks. The unintended
-    suffixed Worker was removed through reviewed cleanup. CI use and production
+    suffixed Worker was removed through reviewed cleanup. Production
     configuration/readiness remain outstanding; R06 stays partial and T064 open.
-  - **Manual CI preparation:** a reviewed-source proposal adds a GitHub Actions
-    workflow with preview as the default, audit/type/CLI/Workers checks and the
-    same native three-app release command. A separate `main` publication job uses
-    a protected `cloudflare-test` environment, owner-only prepared inputs and
-    safe-receipt retention. Local checks pass; environment protection/secrets,
-    the reviewed commit/push and first hosted preview/publication remain pending.
-    This does not complete R06 or T064. See the
-    [CI setup](../../docs/RELEASING.md#manual-github-actions-workflow).
+  - **Manual CI verification:** the reviewed GitHub Actions workflow is committed
+    and pushed, with preview as the default and the same native release command.
+    The `main`-only `cloudflare-test` environment has owner review and all four
+    secrets configured. An explicitly approved token-policy expansion resolved
+    the observed asset-session refusal; its two-request retest returned 200/200.
+    The [complete CI publication](../../docs/RELEASING.md#t064-verified-ci-publication-2026-11-06)
+    of `99b651d0ff95557b9ea79441aa36a188a57390df` passed frozen install, audit,
+    full typechecking, 61 CLI tests, 2,226 Workers tests and three-app preview.
+    Required review preceded Hub/private workspace/router publication. All three
+    native/provider versions, preserved bindings/storage, paused policy and HTTP
+    smoke checks matched. Safe receipt retention and input cleanup passed; raw
+    logs and temporary downloads were not retained. CI tests ran on the GitHub
+    runner; authenticated hosted journeys remain T063 evidence. Production gates
+    keep R06 partial and T064 open.

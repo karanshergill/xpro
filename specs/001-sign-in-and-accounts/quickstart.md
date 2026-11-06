@@ -294,11 +294,18 @@ defaults and the future-consumer boundaries.
 
 ## Current verification and limits
 
-- **Latest local candidate:** [T061](../005-flagship/quickstart.md#local-verification-t061)
+- **Local Flagship checkpoint:** [T061](../005-flagship/quickstart.md#local-verification-t061)
   passed 2,200 Workers tests in 117 files, all 234 browser/integration checks,
   all type projects and all three local builds. Native schema comparison, frozen
   install and the dependency audit passed. The checkpoint records native policy
   evidence and its hosted limits; source application follows exact-diff approval.
+- **Hosted test and CI:** [T063](../004-cloudflare-test/quickstart.md#hosted-verification-t063)
+  records real native sign-in/MFA, private dispatch, picture and diagnostic checks.
+  The [T064 CI checkpoint](../../docs/RELEASING.md#t064-verified-ci-publication-2026-11-06)
+  adds 61 CLI tests, 2,226 Workers-runtime tests, typechecking and preview on the
+  GitHub runner, followed by protected three-app publication, provider readback
+  and three live HTTP checks. Browser and performance acceptance keep their
+  separately recorded scope; production readiness remains open.
 - **Recorded:** T043 passed all 1,780 Workers tests in 89 files, 181 browser cases,
   nine type projects and three local builds. Native schema comparison, frozen
   install and the 427-package audit passed too. Applied-source security rechecks
@@ -318,12 +325,12 @@ defaults and the future-consumer boundaries.
   privacy regressions and outstanding deletion/anonymisation, audit-comment and
   retention decisions. Hosted static/edge headers, observability and asset
   exposure remain separate checks.
-- **Release:** public DNS/TLS, Workers for Platforms dispatch, hosted Images,
+- **Release:** production hostnames/DNS/TLS, routing and Images configuration,
   production timing and manual/assistive-user assessment remain pending. T045's
   [release review](checklists/release-review.md) is complete and withholds
-  deployment and first-client approval. [Master MFA](../002-master-mfa/quickstart.md#t056-final-convergence-checkpoint)
-  is implemented and verified locally. Sanitized production diagnostics and the
-  other hosted/operational/privacy release gates remain open.
+  production deployment and first-client approval. [Master MFA](../002-master-mfa/quickstart.md#t056-final-convergence-checkpoint)
+  has local evidence and T063 hosted verification. Production diagnostics and
+  the other operational/privacy release gates remain open.
 
 Official references: [multi-Worker development](https://developers.cloudflare.com/workers/local-development/multi-workers/),
 [local secrets](https://developers.cloudflare.com/workers/configuration/secrets/#local-development-with-secrets),

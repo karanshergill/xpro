@@ -11,3 +11,8 @@ export { completeLoginCreation } from "#create-login/complete-creation.server.ts
 export { updateProfile, type UpdateProfileServices } from "#update-profile/update-profile.server.ts";
 export { changePassword, type ChangePasswordError, type ChangePasswordServices, type PasswordChange } from "#change-password/change-password.server.ts";
 export { uploadPicture, removePicture, type PictureError, type PictureServices, type PictureProcessingError } from "#picture/picture.server.ts";
+export { validateHubAccess, validateHubLocalAccess, authorizeMasterAuthority,
+  isLoginInactive, isLoginCreationComplete } from "#access/validate-access.server.ts";
+export { readLoginAccess, sessionAccessQuery, masterAuthorityMatches,
+  type LoginAccessRow, type SessionAccessRow, type MasterAuthority } from "#access/validate-access.db.ts";
+export { getMfaAccessState, type MfaAccessFacts } from "#access/mfa-access.ts";

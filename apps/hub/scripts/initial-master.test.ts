@@ -46,6 +46,7 @@ describe("initial master setup", () => {
     expect(audit[0]).toEqual({
       id: expect.any(String), action: "stms_initial_master_created", outcome: "success",
       actorLoginId: null, affectedLoginId: users[0]?.id, reason: null, comment: null,
+      accountId: null, workspaceId: null, details: null,
       requestId: expect.any(String), createdAt: expect.any(String),
     });
     expect(JSON.stringify(audit)).not.toContain(password);

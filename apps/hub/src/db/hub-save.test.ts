@@ -24,7 +24,8 @@ describe("Hub saves", () => {
       db.insertInto("reservedUsernames").values(reserved).compile(),
       db.insertInto("auditEntries").values(audit).compile(),
     ]);
-    expect(await readRecords()).toEqual({ reservedUsernames: [reserved], auditEntries: [audit] });
+    expect(await readRecords()).toEqual({ reservedUsernames: [reserved],
+      auditEntries: [{ ...audit, accountId: null, workspaceId: null, details: null }] });
   });
 
   it("when a later statement fails then earlier changes and their audit are rolled back while unrelated records stay unchanged", async () => {
@@ -36,7 +37,8 @@ describe("Hub saves", () => {
       db.insertInto("auditEntries").values(originalAudit).compile(),
     ]);
     const before = await readRecords();
-    expect(before).toEqual({ reservedUsernames: [unrelated], auditEntries: [originalAudit] });
+    expect(before).toEqual({ reservedUsernames: [unrelated],
+      auditEntries: [{ ...originalAudit, accountId: null, workspaceId: null, details: null }] });
     const reserved = makeReservedUsername();
     const audit = makeAuditEntry();
     await expect(saveHub(env.DB, [
@@ -52,7 +54,8 @@ describe("Hub saves", () => {
     const audit = makeAuditEntry();
     await saveHub(env.DB, [db.insertInto("auditEntries").values(audit).compile()]);
     await expect(saveHub(env.DB, [change(db, audit).compile()])).rejects.toThrow();
-    expect(await db.selectFrom("auditEntries").selectAll().execute()).toEqual([audit]);
+    expect(await db.selectFrom("auditEntries").selectAll().execute())
+      .toEqual([{ ...audit, accountId: null, workspaceId: null, details: null }]);
   });
 
   it("when Hub migrations run again then existing records and audit history stay unchanged", async () => {
@@ -90,13 +93,14 @@ describe("Hub saves", () => {
     expect(upgraded.error).toBeUndefined();
     expect(upgraded.results?.some((result) => result.status === "Success")).toBe(true);
     expect(await readRecords()).toEqual(previous
-      ? { reservedUsernames: [reserved], auditEntries: [audit] }
+      ? { reservedUsernames: [reserved], auditEntries: [{ ...audit, accountId: null, workspaceId: null, details: null }] }
       : { reservedUsernames: [], auditEntries: [] });
     if (!previous) {
       await saveHub(env.DB, [db.insertInto("auditEntries").values(audit).compile()]);
     }
     await expect(saveHub(env.DB, [db.deleteFrom("auditEntries").where("id", "=", audit.id).compile()])).rejects.toThrow();
-    expect(await db.selectFrom("auditEntries").selectAll().execute()).toEqual([audit]);
+    expect(await db.selectFrom("auditEntries").selectAll().execute())
+      .toEqual([{ ...audit, accountId: null, workspaceId: null, details: null }]);
   });
 });
 

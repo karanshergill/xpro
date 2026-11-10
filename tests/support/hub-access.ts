@@ -1,3 +1,3 @@
-// Root integration wiring calls the real Hub code; no substitute validator.
-export { validateHubAccess, validateHubLocalAccess } from "../../apps/hub/src/auth/validate-access.server.ts";
+// Root integration wiring calls the real shared access policy; no substitute validator.
+export { validateHubAccess, validateHubLocalAccess } from "@xpro/accounts/server";
 export { saveHub } from "../../apps/hub/src/db/hub-save.db.ts";

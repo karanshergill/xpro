@@ -10,6 +10,7 @@ import { browserOrigins } from "./addresses";
 import { createHubAuth } from "../../apps/hub/src/auth/auth.server";
 import { createHubDatabase, createHubMigrator } from "../../apps/hub/src/db/hub.db";
 import { createRequestContext, saveHub } from "@xpro/core/server";
+import { createAccount } from "@xpro/stms/server";
 import { enrollMaster, mfaCookie } from "../support/master-mfa";
 import { pictureFile } from "../support/picture-fixtures";
 import { createHubAccess } from "../../apps/hub/src/functions/hub-request.server";
@@ -56,6 +57,8 @@ try {
       incompleteSignIn: ["name"], emailSignIn: [], usernameSignIn: [], wrongSignIn: [], suspendedSignIn: [], archivedSignIn: [],
       masterSignIn: [], spacedSignIn: [], rateSignIn: [], pendingSignIn: [], lostSignIn: [], oauthSignIn: ["phone"],
       createMaster: [], createOtherMaster: [], createExpired: [], createOwner: [], createAdmin: [], createMember: [],
+      accountMaster: [], accountOtherMaster: [], accountJourneyMaster: [], accountExpiredMaster: [], accountSavedMaster: [],
+      accountJourneyHolder: [], accountLostHolder: [], accountRetryHolder: [], accountExpiredHolder: [], accountChangedHolder: [], accountStaleHolder: [], accountRefreshHolder: [], accountLocaleHolder: [], accountSavedHolder: [], accountDuplicateHolder: [],
       stmsMaster: [], stmsLocaleMaster: [], stmsOtherMaster: [], stmsCancel: [], stmsListTarget: [], stmsSuspend: [], stmsOtherReason: [], stmsArchiveActive: [], stmsArchiveSuspended: [],
       stmsEmail: [], stmsUsername: [], stmsReset: [], stmsSelfEmail: [], stmsSelfUsername: [], stmsSelfReset: [], stmsBusy: [], stmsLostStatus: [], stmsLostEmail: [],
       stmsExpiredMaster: [], stmsExpired: [], stmsChanged: [], stmsLocale: [], stmsOtherTarget: [], stmsResetLostSelf: [],
@@ -69,7 +72,7 @@ try {
       const username = missing.includes("username") ? null : key === "other" ? "takenusr" : "u" + crypto.randomUUID().replaceAll("-", "").slice(0, 7);
       const { user } = await auth.api.createUser({ body: { email, password, name: missing.includes("name") ? "" : "Existing name",
         role: ["mfaTampered", "mfaInvalidEnrollment", "mfaInvalidSignIn", "mfaFresh", "mfaSingleUse", "mfaOldSession", "mfaInterrupted", "mfaNoFactors", "mfaRevoked", "mfaRateEnrollment", "mfaRateSignIn", "mfaPrivacy", "mfaKeyboard", "mfaLocale", "mfaTransport", "mfaLostBackups", "mfaManage", "mfaReplace", "mfaRefreshReplace", "mfaLast", "mfaLastBackups", "mfaManageIdentity", "mfaManageOther", "mfaManageLost", "mfaClearSetup", "mfaClearSignIn", "mfaRequestedReturning", "mfaRequested", "mfaConcurrent", "mfaNew", "mfaRefresh", "mfaRestart", "mfaReturning", "mfaBackup", "mfaSigned", "mfaSignedNew", "mfaIdentity", "mfaOther", "securityMaster", "a11yMaster", "master", "masterSignIn", "complete", "createMaster", "createOtherMaster", "createExpired",
-          "stmsMaster", "stmsLocaleMaster", "stmsOtherMaster", "stmsSelfEmail", "stmsSelfUsername", "stmsSelfReset", "stmsExpiredMaster", "stmsResetLostSelf", "profileMaster", "resetMaster", "resetOtherMaster", "resetTargetMaster", "resetSelf", "resetSelfLost", "resetExpired"].includes(key) ? "admin" : "user", data: {
+          "accountMaster", "accountOtherMaster", "accountJourneyMaster", "accountExpiredMaster", "accountSavedMaster", "stmsMaster", "stmsLocaleMaster", "stmsOtherMaster", "stmsSelfEmail", "stmsSelfUsername", "stmsSelfReset", "stmsExpiredMaster", "stmsResetLostSelf", "profileMaster", "resetMaster", "resetOtherMaster", "resetTargetMaster", "resetSelf", "resetSelfLost", "resetExpired"].includes(key) ? "admin" : "user", data: {
           username,
           phone: missing.includes("phone") ? null : "+12025550123",
         } } });
@@ -141,6 +144,22 @@ try {
         role: "user", data: { username, phone: "+12025550123" } } });
       logins["stmsDirectory" + index] = { loginId: user.id, email, username, cookie: "" };
     }
+    const accountActor = logins.accountMaster;
+    if (!accountActor) throw new Error("Missing real account fixture master.");
+    const accountSession = await auth.api.getSession({ headers: { cookie: accountActor.cookie } });
+    if (!accountSession) throw new Error("The real account fixture master must be signed in.");
+    const accountIdentity = { loginId: accountSession.user.id, hubSessionId: accountSession.session.id };
+    async function saveBrowserAccount(holderLoginId: string, name: string): Promise<void> {
+      const created = await createAccount({ operationId: crypto.randomUUID(), holderLoginId, name }, {
+        database: proxy.env.DB, session: accountIdentity, context: createRequestContext(),
+      });
+      if (created.isErr || created.value.action !== "stms_account_created") throw new Error("The real browser account save did not succeed.");
+    }
+    // The real save supplies accounts, audit and revisions for the 25 + 5 paging case.
+    for (let index = 0; index < 30; index++) {
+      const holder = logins["stmsDirectory" + index]; if (!holder) throw new Error("Missing account-directory holder.");
+      await saveBrowserAccount(holder.loginId, "Account directory " + String(index).padStart(2, "0"));
+    }
     await auth.api.createUser({ body: { email: "literal-" + crypto.randomUUID() + "@example.test", name: '{"literal": 1}',
       role: "user", data: { username: "l" + crypto.randomUUID().replaceAll("-", "").slice(0, 7), phone: "+12025550123" } } });
     await saveHub(proxy.env.DB, [db.insertInto("reservedUsernames").values({
@@ -158,8 +177,7 @@ try {
     for (const key of ["protocolAccount", "a11yAccount"]) {
       const accountLogin = logins[key];
       if (!accountLogin) throw new Error("Missing account-holder fixture.");
-      await saveHub(proxy.env.DB, [db.insertInto("accounts").values({ id: v7(), ownerLoginId: accountLogin.loginId,
-        createdAt: new Date().toISOString() }).compile()]);
+      await saveBrowserAccount(accountLogin.loginId, "Browser account");
     }
     const workspaceClient = await auth.api.adminCreateOAuthClient({ headers: { cookie: logins.master?.cookie ?? "" }, body: {
       client_name: "Browser workspace", redirect_uris: [workspaceOrigin, customerOrigin].map((origin) => origin + "/auth/callback"),

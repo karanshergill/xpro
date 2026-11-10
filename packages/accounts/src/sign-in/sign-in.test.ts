@@ -205,8 +205,10 @@ describe("Story 2 — destination rules", () => {
 });
 
 async function prepareAccount(loginId: string): Promise<void> {
+  const createdAt = new Date().toISOString();
   await saveHub(env.DB, [fixture.identities.db.insertInto("accounts")
-    .values({ id: crypto.randomUUID(), ownerLoginId: loginId, createdAt: new Date().toISOString() }).compile()]);
+    .values({ id: crypto.randomUUID(), ownerLoginId: loginId, name: "Fixture account", nameSearch: "fixture account",
+      createdAt, updatedAt: createdAt }).compile()]);
 }
 
 async function expectDestination(input: unknown, login: Awaited<ReturnType<SignInFixture["signIn"]>>, destination: unknown): Promise<void> {
@@ -217,6 +219,7 @@ async function expectDestination(input: unknown, login: Awaited<ReturnType<SignI
 
 function signInAudit(response: Response, values: { outcome: string; actorLoginId: string | null; affectedLoginId: string | null; reason: string | null }) {
   return { id: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/),
+    accountId: null, workspaceId: null, details: null,
     action: "accounts_sign_in", ...values, comment: null, requestId: response.headers.get("x-request-id"), createdAt: expect.any(String) };
 }
 

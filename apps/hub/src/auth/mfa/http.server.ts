@@ -3,7 +3,7 @@ import { parseSetCookieHeader } from "better-auth/cookies";
 import { optional, string } from "valibot";
 import { createHubAuth, type HubAuthSettings } from "#auth/auth.server.ts";
 import { recordSignIn } from "#auth/sign-in.db.ts";
-import { validateHubLocalAccess } from "#auth/validate-access.server.ts";
+import { validateHubLocalAccess } from "@xpro/accounts/server";
 
 type Services = { settings: HubAuthSettings; context: RequestContext; reportError(): Response };
 const failures = {

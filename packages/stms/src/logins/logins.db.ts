@@ -1,6 +1,7 @@
 import { normalizeSearchText } from "@xpro/accounts";
 import { createHubConnection } from "@xpro/core/server";
 import { sql, type CompiledQuery, type Kysely, type SqlBool, type Expression, type RawBuilder } from "kysely";
+import { prefixRange, type PrefixRange } from "#prefix-range.ts";
 import type { LoginPageInput, LoginSearchInput } from "./input";
 import type { LoginDetails, LoginSummary } from "./logins";
 
@@ -67,24 +68,6 @@ function summaryQuery(db: Kysely<LoginsTables>) {
     "user.id as loginId", "user.username", "user.name", "user.email", "user.phone", "user.createdAt",
   ]).select((eb) => eb.case().when("user.archived_at", "is not", null).then("archived" as const)
     .when("user.banned", "=", 1).then("suspended" as const).else("active" as const).end().as("status"));
-}
-
-type PrefixRange = { lower: string; upper: string | null };
-const maximumUnicodePoint = 0x10ffff;
-const lastPointBeforeSurrogates = 0xd7ff;
-const firstPointAfterSurrogates = 0xe000;
-
-function prefixRange(lower: string): PrefixRange {
-  let stem = lower;
-  for (const character of [...lower].reverse()) {
-    stem = stem.slice(0, -character.length);
-    const point = character.codePointAt(0);
-    if (point !== undefined && point < maximumUnicodePoint) {
-      const next = point === lastPointBeforeSurrogates ? firstPointAfterSurrogates : point + 1;
-      return { lower, upper: stem + String.fromCodePoint(next) };
-    }
-  }
-  return { lower, upper: null };
 }
 
 function prefixMatch(value: Expression<string | null>, range: PrefixRange): RawBuilder<SqlBool> {

@@ -28,6 +28,18 @@ export async function createEnrolledMaster(fixture: MfaFixture, input: MasterPro
   return await enrollMaster(fixture, await fixture.identities.signIn({ ...input, role: "admin" }));
 }
 
+export async function createMasterWithLastBackupCode(fixture: MfaFixture): Promise<EnrolledMaster> {
+  const login = await createEnrolledMaster(fixture);
+  for (let index = 0; index < login.backupCodes.length - 1; index++) {
+    const code = login.backupCodes[index];
+    if (code === undefined) throw new Error("The native fixture has no backup code at this position.");
+    const challenge = await beginMfaSignIn(fixture, login.email);
+    const verified = await fixture.auth.api.verifyBackupCode({ headers: { cookie: mfaCookie(challenge) }, body: { code }, asResponse: true });
+    if (verified.status !== 200) throw new Error("Native backup-code fixture consumption did not succeed.");
+  }
+  return login;
+}
+
 export async function enrollMaster(fixture: MfaReader & { password: string }, login: Pick<SignedInLogin, "loginId" | "email" | "cookie">): Promise<EnrolledMaster> {
   const setup = await fixture.auth.api.enableTwoFactor({ headers: { cookie: login.cookie }, body: { password: fixture.password }, asResponse: true });
   if (setup.status !== 200) throw new Error("Native fixture setup did not succeed.");

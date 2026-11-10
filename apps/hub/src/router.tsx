@@ -14,6 +14,8 @@ import "./functions/create-login.functions";
 import "#functions/reset-password.functions";
 import "#functions/profile.functions";
 import "#functions/picture.functions";
+import "#functions/management-operations.functions";
+import "#functions/accounts.functions";
 
 export function getRouter(): Router<typeof routeTree> {
   let isInitialRender = true;

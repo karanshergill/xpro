@@ -22,7 +22,8 @@ describe("authentication privacy", () => {
     expect(audits).toHaveLength(2);
     expect(audits.map(({ outcome }) => outcome).sort()).toEqual(["refused", "success"]);
     for (const entry of audits) {
-      expect(Object.keys(entry).sort()).toEqual(["action", "actorLoginId", "affectedLoginId", "comment", "createdAt", "id", "outcome", "reason", "requestId"].sort());
+      expect(Object.keys(entry).sort()).toEqual(["accountId", "action", "actorLoginId", "affectedLoginId", "comment", "createdAt", "details", "id", "outcome", "reason", "requestId", "workspaceId"].sort());
+      expect(entry).toMatchObject({ accountId: null, workspaceId: null, details: null });
       expect(entry.action).toBe("accounts_sign_in"); expect(entry.comment).toBeNull();
       expect(entry.reason).toBe(entry.outcome === "success" ? null : "accounts_credentials_invalid");
       expect(entry.actorLoginId).toBe(entry.outcome === "success" ? person.loginId : null);

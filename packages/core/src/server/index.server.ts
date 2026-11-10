@@ -9,7 +9,7 @@ export type {
   AccessAction, AccessActor, AccessError, AccessRequest, AccessRequestInput, AccessSession,
   HubAccessBinding, HubAccessInput, HubAccessResult, MfaAccessState, ProfileField, WorkspaceMembershipRole,
 } from "#access/access.ts";
-export { isMfaRecent } from "#access/access-policy.ts";
+export { authorizeAccess, isMfaRecent } from "#access/access-policy.ts";
 export { createAccessRequest } from "#access/access.server.ts";
 export { parseUtcTimestamp } from "#dates/dates.ts";
 export { createPrivateCookie, readPrivateCookie, clearPrivateCookie } from "#cookies/private-cookie.server.ts";

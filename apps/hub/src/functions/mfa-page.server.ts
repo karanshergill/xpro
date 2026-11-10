@@ -3,9 +3,8 @@ import { pageLoginIdHeader } from "@xpro/core";
 import { createErrorResponse, createRequestContext, isMfaRecent, parseInput, reportUnexpectedError, requestIdHeader } from "@xpro/core/server";
 import { createAuthMiddleware } from "better-auth/api";
 import { createHubAuth, type HubAuthSettings } from "#auth/auth.server.ts";
-import { getMfaAccessState } from "#auth/mfa/access.ts";
+import { getMfaAccessState, isLoginCreationComplete, isLoginInactive } from "@xpro/accounts/server";
 import { readMfaSessionPage, readMfaChallengePage } from "#auth/mfa/page.db.ts";
-import { isLoginCreationComplete, isLoginInactive } from "#auth/validate-access.server.ts";
 
 export function validateMfaPage(input: unknown): { variant: "Ok"; value: Record<string, never> } | { variant: "Err"; error: CoreError } { return parseInput(input, {}).toJSON(); }
 
@@ -27,7 +26,7 @@ export async function handleMfaPage(input: ReturnType<typeof validateMfaPage>, s
       challenge: await ctx.getSignedCookie(native.createAuthCookie("two_factor").name, native.secret),
     }));
     const cookies = await readCookies({ headers: request.headers });
-    const session = cookies.token ? await readMfaSessionPage(settings.database, { token: cookies.token, context }) : undefined;
+    const session = cookies.token ? await readMfaSessionPage(settings.database, cookies.token) : undefined;
     const hasSession = session && Date.parse(session.expiresAt) > Date.now();
     if (hasSession && cookies.challenge) return createErrorResponse({ code: "core_unauthenticated" }, context);
     const challenge = !hasSession && cookies.challenge ? await readMfaChallengePage(settings.database, cookies.challenge) : undefined;

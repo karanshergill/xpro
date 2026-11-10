@@ -104,6 +104,7 @@ export async function expectManagementSaved(input: {
   const audit = { id: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-7/),
     action: input.action, outcome: "success", actorLoginId: input.fixture.master.loginId,
     affectedLoginId: input.loginId, reason: input.reason ?? null, comment: input.comment ?? null,
+    accountId: null, workspaceId: null, details: null,
     requestId: input.services.context.requestId, createdAt: expect.any(String) };
   expect(after).toEqual({ ...input.before, hub: { ...input.before.hub,
     users: input.before.hub.users.map((row) => row.id === input.loginId

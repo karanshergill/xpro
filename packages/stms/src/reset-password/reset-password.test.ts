@@ -225,6 +225,7 @@ async function expectSaved(input: { input: ResetInput; services: ResetPasswordSe
   expect(await native.password.verify({ hash: saved.password, password: submitted.newPassword })).toBe(true);
   const audit = { id: expect.any(String), action: "stms_password_reset", outcome: "success",
     actorLoginId: actor.loginId, affectedLoginId: submitted.loginId, reason: null, comment: submitted.comment ?? null,
+    accountId: null, workspaceId: null, details: null,
     requestId: services.context.requestId, createdAt: expect.any(String) };
   expect(after).toEqual({ ...before, hub: { ...before.hub,
     users: before.hub.users.map((row) => row.id === submitted.loginId ? { ...row, authRevision: row.authRevision + 1 } : row),

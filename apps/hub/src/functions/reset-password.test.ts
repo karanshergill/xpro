@@ -30,6 +30,7 @@ describe("authenticated Hub password reset", () => {
     expect(after.hub.audits).toEqual(expect.arrayContaining([
       ...before.hub.audits, { id: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-7/), action: "stms_password_reset", outcome: "success",
         actorLoginId: fixture.master.loginId, affectedLoginId: fixture.target.loginId, reason: null, comment: null,
+        accountId: null, workspaceId: null, details: null,
         requestId, createdAt: expect.any(String) },
     ]));
     expect((await signInAfterReset({ fixture, login: fixture.target, password: input().newPassword })).response.status).toBe(200);

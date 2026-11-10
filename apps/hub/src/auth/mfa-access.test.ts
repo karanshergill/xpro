@@ -4,7 +4,7 @@ import { createHubIdentities, type HubIdentities, type SignedInLogin } from "#te
 import { err, ok } from "true-myth/result";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { saveHub } from "#db/hub-save.db.ts";
-import { validateHubAccess, validateHubLocalAccess } from "./validate-access.server";
+import { validateHubAccess, validateHubLocalAccess } from "@xpro/accounts/server";
 
 let identities: HubIdentities;
 beforeEach(async () => { identities = await createHubIdentities(env.DB); });

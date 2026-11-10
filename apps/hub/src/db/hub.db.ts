@@ -1,9 +1,10 @@
 import { createHubConnection } from "@xpro/core/server";
-import { type Kysely, Migrator } from "kysely";
+import { type Generated, type Kysely, Migrator } from "kysely";
 import * as initialHub from "./migrations/2026-10-27-010000-initial-hub";
 import * as workspacePlacements from "./migrations/2026-10-28-100900-workspace-placements";
 import * as loginSearch from "./migrations/2026-10-29-100000-login-search";
 import * as masterMfa from "./migrations/2026-10-31-014344-master-mfa";
+import * as accountWorkspaces from "./migrations/2026-11-07-010000-account-workspaces";
 
 type UserRow = {
   id: string;
@@ -57,7 +58,25 @@ type HubTables = {
     id: string; secret: string; backupCodes: string; userId: string;
     verified: number | null; failedVerificationCount: number | null; lockedUntil: string | null;
   };
-  accounts: { id: string; ownerLoginId: string; createdAt: string };
+  accounts: {
+    id: string; ownerLoginId: string; name: string | null; nameSearch: string | null;
+    status: Generated<"stms_active" | "stms_suspended">; revision: Generated<number>;
+    createdAt: string; updatedAt: string;
+  };
+  workspaces: {
+    id: string; accountId: string; status: Generated<"stms_active" | "stms_suspended">;
+    revision: Generated<number>; regionHint: string; nameSearch: string;
+    createdAt: string; updatedAt: string;
+  };
+  workspaceCreations: {
+    id: string; workspaceId: string; initiatorLoginId: string; attemptLoginId: string;
+    attemptSessionId: string; attemptRevision: Generated<number>;
+    phase: "stms_registered" | "stms_client_ready" | "stms_artifact_verified"
+      | "stms_worker_verified" | "stms_owner_prepared" | "stms_complete";
+    workerName: string; origin: string; releaseId: string; clientId: string;
+    credentialEnvelope: string | null; errorCode: string | null; completedAt: string | null;
+    createdAt: string; updatedAt: string;
+  };
   reservedUsernames: { id: string; username: string; addedAt: string };
   loginCreations: {
     id: string; creatorLoginId: string; organizationId: string | null;
@@ -68,6 +87,7 @@ type HubTables = {
     id: string; action: string; outcome: string; actorLoginId: string | null;
     affectedLoginId: string | null; reason: string | null; comment: string | null;
     requestId: string; createdAt: string;
+    accountId: Generated<string | null>; workspaceId: Generated<string | null>; details: Generated<string | null>;
   };
 };
 
@@ -83,6 +103,7 @@ export function createHubMigrator<Database>(database: Kysely<Database>): Migrato
       "2026-10-28-100900-workspace-placements": workspacePlacements,
       "2026-10-29-100000-login-search": loginSearch,
       "2026-10-31-014344-master-mfa": masterMfa,
+      "2026-11-07-010000-account-workspaces": accountWorkspaces,
     }; } },
   });
 }

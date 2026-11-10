@@ -2,8 +2,7 @@ import { createAccessRequest, createErrorResponse, createRequestContext, reportU
   type AccessError, type RequestContext } from "@xpro/core/server";
 import { APIError, createAuthMiddleware, getAuthoritativeSessionFromCtx } from "better-auth/api";
 import type { BetterAuthOptions } from "better-auth";
-import { readLoginAccess } from "./validate-access.db";
-import { isLoginCreationComplete, isLoginInactive, validateHubLocalAccess } from "./validate-access.server";
+import { readLoginAccess, isLoginCreationComplete, isLoginInactive, validateHubLocalAccess } from "@xpro/accounts/server";
 import { captureAuthSource } from "#auth/mfa/context.db.ts";
 import { readMfaOperation } from "#auth/mfa/context.db.ts";
 import { captureMfaOperation, createMfaVerificationHooks, finishMfaOperation } from "#auth/mfa/native.server.ts";

@@ -16,7 +16,13 @@ export async function preparePlacement(fixture: SignInFixture, input: {
   loginId?: string; kind?: "internal" | "external"; origin?: string; alias?: string;
 } = {}): Promise<PreparedWorkspace> {
   const workspace = await fixture.prepareWorkspace({ ...input, aliases: input.alias ? [input.alias] : [] });
-  const origins = [workspace.origin, ...(input.alias ? [input.alias] : [])];
+  return { ...workspace, ...await savePlacement(fixture, workspace, input.alias) };
+}
+
+export async function savePlacement(fixture: Pick<SignInFixture, "identities">,
+  workspace: Pick<WorkspaceFixture, "id" | "origin">, alias?: string,
+): Promise<Pick<PreparedWorkspace, "placementId" | "workerName" | "origins">> {
+  const origins = [workspace.origin, ...(alias ? [alias] : [])];
   const placementId = v7(), workerName = "xpro-" + workspace.id;
   const createdAt = new Date().toISOString();
   await saveHub(env.DB, [
@@ -25,7 +31,7 @@ export async function preparePlacement(fixture: SignInFixture, input: {
       id: v7(), workspacePlacementId: placementId, origin, isPrimary: index === 0 ? 1 : 0, createdAt,
     }).compile()),
   ]);
-  return { ...workspace, placementId, workerName, origins };
+  return { placementId, workerName, origins };
 }
 
 export async function route(request: Request, services: Omit<RouterServices, "execution">): Promise<Response> {

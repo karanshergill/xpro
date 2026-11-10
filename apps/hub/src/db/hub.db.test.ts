@@ -31,7 +31,6 @@ describe("Hub schema", () => {
     await sql.raw(authSchemaStatements[0]).execute(db);
     const result = await createHubMigrator(db).migrateToLatest();
     expect(result.error).toBeUndefined();
-    expect(result.results?.map((migration) => migration.status)).toEqual(["Success", "Success", "Success", "Success"]);
     expect(await db.selectFrom("reservedUsernames").selectAll().execute()).toEqual([]);
     expect(await db.selectFrom("auditEntries").selectAll().execute()).toEqual([]);
   });

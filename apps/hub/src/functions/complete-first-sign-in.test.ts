@@ -32,6 +32,7 @@ describe("authenticated Hub profile completion", () => {
       } : user),
       audits: [...before.audits, { id: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/),
         action: "accounts_username_set", outcome: "success", actorLoginId: login.loginId, affectedLoginId: login.loginId,
+        accountId: null, workspaceId: null, details: null,
         reason: null, comment: null, requestId, createdAt: expect.any(String) }],
     });
   });

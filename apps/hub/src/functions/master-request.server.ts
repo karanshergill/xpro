@@ -27,12 +27,13 @@ export async function withMasterReadRequest(services: Services, run: Run): Promi
   try {
     const { request, settings } = services, url = new URL(request.url);
     // Start invokes read functions directly during these pages' SSR. Public RPC stays POST.
-    const isPageRead = request.method === "GET" && /^\/stms\/logins(?:\/[a-f\d-]{36})?\/?$/i.test(url.pathname);
+    const isPageRead = request.method === "GET" && (/^\/stms\/logins(?:\/[a-f\d-]{36})?\/?$/i.test(url.pathname)
+      || /^\/stms\/accounts(?:\/(?:new|[a-fA-F\d]{8}-(?:[a-fA-F\d]{4}-){3}[a-fA-F\d]{12}))?\/?$/.test(url.pathname));
     if (url.origin !== new URL(settings.baseURL).origin || !isPageRead) return createErrorResponse({ code: "core_forbidden" }, context);
-    const { auth, access } = await createHubAccess(request, { settings: { ...settings, onUnexpectedError: reportError }, context });
+    const { auth, access, session } = await createHubAccess(request, { settings: { ...settings, onUnexpectedError: reportError }, context });
     const actor = authorizeMasterActor(request, access);
     if (actor.isErr) return createErrorResponse(actor.error, context);
-    return addPageActor(await run({ ...services, auth, access, context, reportError, actor: actor.value }), actor.value);
+    return addPageActor(await run({ ...services, auth, access, session, context, reportError, actor: actor.value }), actor.value);
   } catch { return reportError(); }
 }
 

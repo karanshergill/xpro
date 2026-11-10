@@ -1,10 +1,9 @@
-import type { CreateLoginServices, LoginCreationIdentity } from "@xpro/accounts/server";
+import { validateHubLocalAccess, type CreateLoginServices, type LoginCreationIdentity } from "@xpro/accounts/server";
 import { pageLoginIdHeader } from "@xpro/core";
 import { err, ok, type Result } from "true-myth/result";
 import { createAccessRequest, type AccessActor, type AccessRequest, type CoreError, type RequestContext } from "@xpro/core/server";
 import { isAPIError } from "better-auth/api";
 import { createHubAuth, type HubAuthSettings } from "./auth.server";
-import { validateHubLocalAccess } from "./validate-access.server";
 
 export async function createLoginServices(request: Request, input: { settings: HubAuthSettings; context: RequestContext }): Promise<CreateLoginServices> {
   const { settings, context } = input;

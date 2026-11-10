@@ -1,7 +1,7 @@
 import { WorkerEntrypoint } from "cloudflare:workers";
 import { object, nullable, pipe, safeParse, strictObject, string, uuid } from "valibot";
 import type { HubAccessResult } from "@xpro/core/server";
-import { validateHubAccess } from "./validate-access.server";
+import { validateHubAccess } from "@xpro/accounts/server";
 
 const idSchema = pipe(string(), uuid());
 const inputSchema = strictObject({

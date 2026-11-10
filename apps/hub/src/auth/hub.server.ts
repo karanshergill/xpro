@@ -1,11 +1,10 @@
-import { getSignInDestination } from "@xpro/accounts/server";
+import { getSignInDestination, validateHubLocalAccess } from "@xpro/accounts/server";
 import { createAccessRequest, createErrorResponse, createRequestContext, reportUnexpectedError, requestIdHeader,
   type RequestContext } from "@xpro/core/server";
 import { isHttpsOrigin } from "@xpro/stms";
 import { readWorkspaceOrigin } from "@xpro/stms/server";
 import { createHubAuth } from "./auth.server";
 import { handleHubAuthRequest, type HubRequestSettings } from "./oidc.server";
-import { validateHubLocalAccess } from "./validate-access.server";
 
 export async function handleHubRequest(request: Request, settings: HubRequestSettings): Promise<Response | null> {
   const url = new URL(request.url);

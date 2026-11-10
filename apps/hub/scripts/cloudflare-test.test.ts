@@ -42,6 +42,7 @@ describe("private Cloudflare test preparation", () => {
     expect(audit.map((entry) => entry.action)).toEqual(["stms_initial_master_created", "stms_test_workspace_prepared"]);
     expect(audit[1]).toEqual({ id: expect.any(String), action: "stms_test_workspace_prepared", outcome: "success",
       actorLoginId: prepared.receipt.loginId, affectedLoginId: null, reason: null, comment: null,
+      accountId: null, workspaceId: null, details: null,
       requestId: expect.any(String), createdAt: expect.any(String) });
     for (const value of [input.email, input.password, input.hubSecret, input.workspaceSessionSecret, input.turnstileSecretKey, prepared.clientSecret]) {
       expect(JSON.stringify(audit)).not.toContain(value);

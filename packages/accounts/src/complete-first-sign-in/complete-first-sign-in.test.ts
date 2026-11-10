@@ -446,6 +446,7 @@ async function expectSaved(input: { login: CreatedLogin; before: HubState;
   const hasNewUsername = profile.username !== getProfileFrom(before, login.loginId).username;
   const newAudit = hasNewUsername ? [{ id: expect.any(String), action: "accounts_username_set", outcome: "success",
     actorLoginId: login.loginId, affectedLoginId: login.loginId, reason: null, comment: null,
+    accountId: null, workspaceId: null, details: null,
     requestId: context?.context.requestId ?? expect.any(String), createdAt: expect.any(String) }] : [];
   expect(after).toEqual({ ...before,
     users: before.users.map((user) => user.id === login.loginId ? { ...user, ...profile, nameSearch: profile.name.trim().toLowerCase(),

@@ -1,11 +1,10 @@
 import { firstSignInEntries } from "@xpro/accounts";
-import { completeFirstSignIn, type FirstSignInError } from "@xpro/accounts/server";
+import { completeFirstSignIn, validateHubLocalAccess, type FirstSignInError } from "@xpro/accounts/server";
 import {
   createAccessRequest, createErrorResponse, createRequestContext, parseInput, reportUnexpectedError,
   requestIdHeader, type RequestContext,
 } from "@xpro/core/server";
 import { createHubAuth, type HubAuthSettings } from "#auth/auth.server.ts";
-import { validateHubLocalAccess } from "#auth/validate-access.server.ts";
 
 const usernameErrors = {
   accounts_username_invalid: { status: 400, message: "Use 4–8 lowercase characters, starting with a letter; letters, digits, dots, dashes and underscores are allowed." },

@@ -7,6 +7,7 @@ export function StmsShell({ children }: { children: ReactNode }): React.JSX.Elem
   return <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-12">
     <nav aria-label={m.stms_logins_navigation()} className="mb-7 flex flex-wrap gap-x-6 gap-y-2 text-sm">
       <a href="/stms/logins" className="inline-flex min-h-6 items-center underline underline-offset-4">{m.stms_logins_title()}</a>
+      <a href="/stms/accounts" className="inline-flex min-h-6 items-center underline underline-offset-4">{m.stms_accounts_title()}</a>
       <a href="/create-login" className="inline-flex min-h-6 items-center underline underline-offset-4">{m.stms_logins_create()}</a>
       <a href="/profile" className="inline-flex min-h-6 items-center underline underline-offset-4">{m.stms_logins_profile()}</a>
     </nav>{children}</main>;

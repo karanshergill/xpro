@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getMfaAccessState, type MfaAccessFacts } from "./access";
+import { getMfaAccessState, type MfaAccessFacts } from "./mfa-access";
 
 const now = Date.parse("2026-10-31T10:00:00.000Z");
 const base: MfaAccessFacts = { isMaster: true, userAuthRevision: 0, sessionAuthRevision: 0, twoFactorEnabled: 0,

@@ -1,7 +1,7 @@
 import { createAccessRequest, createErrorResponse, createRequestContext, parseInput, reportUnexpectedError,
   requestIdHeader, type ProfileField } from "@xpro/core/server";
 import { createHubAuth, type HubAuthSettings } from "#auth/auth.server.ts";
-import { validateHubLocalAccess } from "#auth/validate-access.server.ts";
+import { validateHubLocalAccess } from "@xpro/accounts/server";
 
 type ParsedInput = ReturnType<typeof parseInput<Record<string, never>>>;
 

@@ -7,6 +7,17 @@ import { createHubAuth } from "#auth/auth.server.ts";
 import { parseCookies, setRequestCookie } from "better-auth/cookies";
 import type { MfaTables } from "./phases.db";
 
+// Control only the outside budget decision; native authentication and storage remain real.
+// Keeping the test budget open avoids races with the platform's wall-clock window rollover.
+function createAttemptBudget(): RateLimit {
+  const attempts = new Map<string, number>();
+  return { async limit({ key }) {
+    const count = (attempts.get(key) ?? 0) + 1;
+    attempts.set(key, count);
+    return { success: count <= 10 };
+  } };
+}
+
 let fixture: MfaFixture;
 beforeEach(async () => { fixture = await createMfaFixture(env.DB); });
 afterEach(async () => { vi.useRealTimers(); await fixture.identities.db.destroy(); });
@@ -133,9 +144,9 @@ describe("native MFA proof and attempt protection", () => {
     expect((await auth.api.verifyTOTP({ headers: { cookie: login.cookie }, body: { code: await currentMfaCode(fixture, login.loginId) }, asResponse: true })).status).toBe(200);
   });
 
-  it("when authenticated enrollment exhausts the real Cloudflare budget then even a correct code cannot activate MFA", async () => {
+  it("when authenticated enrollment exhausts its login budget then even a correct code cannot activate MFA", async () => {
     const login = await fixture.identities.signIn({ role: "admin" });
-    const auth = await createHubAuth({ database: env.DB, baseURL: fixture.origin, secret: fixture.auth.options.secret, rateLimiter: env.SIGN_IN_RATE_LIMITER });
+    const auth = await createHubAuth({ database: env.DB, baseURL: fixture.origin, secret: fixture.auth.options.secret, rateLimiter: createAttemptBudget() });
     await auth.$context;
     expect((await auth.api.enableTwoFactor({ headers: { cookie: login.cookie }, body: { password: fixture.password }, asResponse: true })).status).toBe(200);
     for (let attempt = 0; attempt < 9; attempt += 1) expect((await auth.api.verifyTOTP({ headers: { cookie: login.cookie }, body: { code: "not-a-code" }, asResponse: true })).status).toBe(401);
@@ -149,9 +160,9 @@ describe("native MFA proof and attempt protection", () => {
       workspaceId: null, context: createRequestContext() })).toEqual({ status: "invalid", code: "core_unauthenticated" });
   });
 
-  it("when TOTP, backup and management submissions share the real login budget then their combined limit cannot be reset by changing methods", async () => {
+  it("when TOTP, backup and management submissions share one login budget then their combined limit cannot be reset by changing methods", async () => {
     const login = await createEnrolledMaster(fixture), other = await createEnrolledMaster(fixture);
-    const auth = await createHubAuth({ database: env.DB, baseURL: fixture.origin, secret: fixture.auth.options.secret, rateLimiter: env.SIGN_IN_RATE_LIMITER });
+    const auth = await createHubAuth({ database: env.DB, baseURL: fixture.origin, secret: fixture.auth.options.secret, rateLimiter: createAttemptBudget() });
     await auth.$context;
     for (let attempt = 0; attempt < 3; attempt += 1) expect((await auth.api.generateBackupCodes({ headers: { cookie: login.cookie }, body: { password: fixture.password }, asResponse: true })).status).toBe(200);
     for (const method of ["totp", "backup"] as const) {

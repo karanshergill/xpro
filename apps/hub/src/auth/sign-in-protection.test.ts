@@ -209,6 +209,7 @@ async function expectRefusal(
   expect(await readHubState(fixture.identities)).toEqual({ ...before, audits: [
     ...before.audits, { id: expect.any(String), action: "accounts_sign_in", outcome: "refused",
       actorLoginId: null, affectedLoginId: null, reason: failure.code, comment: null,
+      accountId: null, workspaceId: null, details: null,
       requestId, createdAt: expect.any(String) },
   ] });
 }

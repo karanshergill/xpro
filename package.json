@@ -26,6 +26,7 @@
     "test:e2e": "bun run tests/e2e/run.ts",
     "typecheck:e2e": "tsc --noEmit -p tests/e2e/tsconfig.json",
     "setup:cloudflare-test": "node --import tsx apps/hub/scripts/cloudflare-test.ts",
+    "preflight:account-workspaces": "WRANGLER_LOG=none WRANGLER_WRITE_LOGS=false WRANGLER_SEND_METRICS=false WRANGLER_HIDE_BANNER=true node --import tsx apps/hub/scripts/account-workspace-preflight.ts",
     "test:e2e:install": "playwright install chromium"
   },
   "devDependencies": {

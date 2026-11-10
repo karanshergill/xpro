@@ -17,6 +17,7 @@ const reads = [
   { name: "list", handle: handleListLogins, input: (): unknown => ({}), path: (): string => "/stms/logins" },
   { name: "search", handle: handleSearchLogins, input: (): unknown => ({ query: "Amber" }), path: (): string => "/stms/logins/" },
   { name: "detail", handle: handleGetLogin, input: (): unknown => ({ loginId: fixture.target.loginId }), path: (): string => "/stms/logins/" + fixture.target.loginId },
+  { name: "account holder choices", handle: handleListLogins, input: (): unknown => ({}), path: (): string => "/stms/accounts/new" },
 ];
 
 describe.each(reads)("Master $name page reader", (action) => {
@@ -50,7 +51,7 @@ describe.each(reads)("Master $name page reader", (action) => {
 });
 
 describe("STMS SSR read boundary", () => {
-  it.each(["/profile", "/_serverFn/list", "/stms", "/stms/logins/not-an-id", "/stms/logins/extra/path"])("when a GET is for %s then the SSR exception cannot be used from that path", async (path) => {
+  it.each(["/profile", "/_serverFn/list", "/stms", "/stms/logins/not-an-id", "/stms/logins/extra/path", "/stms/accounts/new/extra", "/stms/accounts/not-an-id", "/stms/accounts/newer", "/stms/accounts//new", "/stms/accounts/------------------------------------", "/stms/accounts/%6eew", "/stms/workspaces"])("when a GET is for %s then the SSR exception cannot be used from that path", async (path) => {
     await expectFailure(await handleListLogins({}, services(request(path))), "core_forbidden");
   });
   it.each(["HEAD", "PUT", "DELETE"])("when the method is %s then no page read is allowed", async (method) => {
@@ -90,3 +91,17 @@ async function expectFailure(response: Response, code: string): Promise<void> {
   const body = await response.json(); expect(body).toMatchObject({ code, requestId: response.headers.get("x-request-id") });
   expect(Object.keys(body as object).sort()).toEqual(["code", "message", "requestId", ...(code === "core_profile_incomplete" ? ["fields"] : [])].sort());
 }
+
+const accountPagePaths = ["/stms/accounts", "/stms/accounts/", "/stms/accounts/new", "/stms/accounts/new/",
+  "/stms/accounts/01234567-89ab-7def-8123-456789abcdef", "/stms/accounts/01234567-89AB-7DEF-8123-456789ABCDEF/"];
+describe.each(accountPagePaths)("Account SSR read at %s", (path) => {
+  it("when the native master reads the directory then real holder data and the original page actor are returned without writes", async () => {
+    const before = await readResetState(fixture);
+    const response = await handleListLogins({}, services(request(path, { headers: { [pageLoginIdHeader]: fixture.master.loginId } })));
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ logins: expect.arrayContaining([expect.objectContaining({ loginId: fixture.target.loginId })]) });
+    expect(response.headers.get(pageLoginIdHeader)).toBe(fixture.master.loginId);
+    expect(response.headers.get("cache-control")).toBe("no-store"); expect(response.headers.get("set-cookie")).toBeNull();
+    expect(await readResetState(fixture)).toEqual(before);
+  });
+});

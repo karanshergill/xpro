@@ -3,7 +3,7 @@ import { pageLoginIdHeader } from "@xpro/core";
 import { APIError, createAuthMiddleware, getAuthoritativeSessionFromCtx, isAPIError } from "better-auth/api";
 import type { BetterAuthOptions } from "better-auth";
 import { v7 } from "uuid";
-import { getMfaAccessState } from "./access";
+import { getMfaAccessState } from "@xpro/accounts/server";
 import { readAuthSource, readMfaOperation, refuseMfaWrite, setMfaOperation } from "./context.db";
 import { assertMfaSource, completeMfaSession, readMfaChallenge, readMfaSnapshot, readPasswordAccount, type MfaOperation, type MfaStorage } from "./phases.db";
 

@@ -1,4 +1,5 @@
 import { fileURLToPath } from "node:url";
+import { availableParallelism } from "node:os";
 import { cloudflareTest } from "@cloudflare/vitest-plugin";
 import { defineConfig } from "vitest/config";
 
@@ -8,6 +9,8 @@ export default defineConfig({
   test: {
     include: ["tests/**/*.test.{ts,tsx}", "packages/*/src/**/*.test.{ts,tsx}", "apps/*/{src,scripts}/**/*.test.{ts,tsx}"],
     setupFiles: ["./tests/support/setup.ts"],
+    // Each native test worker starts a Miniflare runtime; bound contention, not deadlines.
+    maxWorkers: Math.min(4, availableParallelism()),
     coverage: {
       provider: "istanbul",
       include: ["packages/*/src/**/*.ts", "apps/*/src/**/*.server.ts", "apps/*/src/**/*.db.ts", "tests/support/runtime.ts"],

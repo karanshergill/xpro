@@ -46,8 +46,10 @@ describe("Hub destination routing", () => {
 
   it("when an account holder has no workspace then the Hub selects their account page", async () => {
     const created = await fixture.identities.createLogin();
+    const createdAt = new Date().toISOString();
     await saveHub(env.DB, [fixture.identities.db.insertInto("accounts").values({
-      id: crypto.randomUUID(), ownerLoginId: created.loginId, createdAt: new Date().toISOString(),
+      id: crypto.randomUUID(), ownerLoginId: created.loginId, name: "Fixture account", nameSearch: "fixture account",
+      createdAt, updatedAt: createdAt,
     }).compile()]);
     const login = await fixture.signIn(created, handleHubAuthRequest);
     const response = await destination(login.cookie);

@@ -1,7 +1,7 @@
 import type { oauthProvider } from "@better-auth/oauth-provider";
 import { createAccessRequest, createErrorResponse, createRequestContext, type AccessError, type AccessSession, type RequestContext } from "@xpro/core/server";
 import { APIError } from "better-auth/api";
-import { validateHubLocalAccess } from "./validate-access.server";
+import { validateHubLocalAccess } from "@xpro/accounts/server";
 
 type OAuthOptions = NonNullable<Parameters<typeof oauthProvider>[0]>;
 type Settings = { database: D1Database; requestContext?: RequestContext };

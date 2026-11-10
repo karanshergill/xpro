@@ -1,5 +1,5 @@
-import { createHubConnection, type RequestContext } from "@xpro/core/server";
-import { sessionAccessQuery, type LoginAccessRow, type SessionAccessRow } from "#auth/validate-access.db.ts";
+import { createHubConnection } from "@xpro/core/server";
+import { sessionAccessQuery, type LoginAccessRow, type SessionAccessRow } from "@xpro/accounts/server";
 import type { MfaTables } from "./phases.db";
 
 export type ChallengePageRow = Pick<LoginAccessRow, "loginId" | "role" | "banned" | "archivedAt" | "loginCreationId" | "creationLoginId" | "creationCompletedAt"> & {
@@ -7,11 +7,11 @@ export type ChallengePageRow = Pick<LoginAccessRow, "loginId" | "role" | "banned
   twoFactorEnabled: number | null; factorId: string | null; factorVerified: number | null;
 };
 
-export async function readMfaSessionPage(database: D1Database, input: { token: string; context: RequestContext }): Promise<SessionAccessRow | undefined> {
+export async function readMfaSessionPage(database: D1Database, token: string): Promise<SessionAccessRow | undefined> {
   const db = (await createHubConnection<MfaTables>(database)).withoutPlugins();
   try {
-    const session = await db.selectFrom("session").select(["id", "userId"]).where("token", "=", input.token).executeTakeFirst();
-    return session ? (await sessionAccessQuery({ loginId: session.userId, hubSessionId: session.id, workspaceId: null, context: input.context }).execute(db)).rows[0] : undefined;
+    const session = await db.selectFrom("session").select(["id", "userId"]).where("token", "=", token).executeTakeFirst();
+    return session ? (await sessionAccessQuery({ loginId: session.userId, hubSessionId: session.id, workspaceId: null }).execute(db)).rows[0] : undefined;
   } finally { await db.destroy(); }
 }
 

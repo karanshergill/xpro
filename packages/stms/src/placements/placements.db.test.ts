@@ -3,7 +3,7 @@ import { createRequestContext, saveHub } from "@xpro/core/server";
 import { CompiledQuery } from "kysely";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createSignInFixture, type SignInFixture } from "#test/sign-in";
-import { preparePlacement, readPlacements } from "#test/routing";
+import { preparePlacement, readPlacements, savePlacement } from "#test/routing";
 import { placementQuery, readWorkspaceChoices, readWorkspaceOrigin, readWorkspacePlacement, resolvePlacement, workspaceChoicesQuery, workspaceOriginQuery, workspacePlacementQuery } from "./placements.db";
 
 let fixture: SignInFixture;
@@ -37,12 +37,25 @@ describe("Prepared workspace directory", () => {
   });
 
   it("when a master pages prepared workspaces then every workspace appears once with its primary origin and no internal fields", async () => {
+    // This query only needs native organizations and directory rows, not OAuth clients or MFA sessions.
     const prepared = [];
-    for (let index = 0; index < 23; index++) prepared.push(await preparePlacement(fixture,
-      index === 0 ? { alias: "https://custom.example.test" } : {}));
-    const unpreparedOwner = await fixture.identities.createLogin();
+    for (let index = 0; index < 23; index++) {
+      const { user: owner } = await fixture.identities.auth.api.createUser({ body: {
+        email: "directory-owner-" + crypto.randomUUID() + "@example.test", name: "Directory owner", role: "user",
+      } });
+      const organization = await fixture.identities.auth.api.createOrganization({ body: {
+        name: "Prepared workspace", slug: crypto.randomUUID(), userId: owner.id,
+      } });
+      if (!organization) throw new Error("The native API did not create the prepared workspace.");
+      const workspace = { id: organization.id, origin: `https://w-${organization.id}.example.test` };
+      prepared.push({ ...workspace, ...await savePlacement(fixture, workspace,
+        index === 0 ? "https://custom.example.test" : undefined) });
+    }
+    const { user: unpreparedOwner } = await fixture.identities.auth.api.createUser({ body: {
+      email: "unprepared-owner-" + crypto.randomUUID() + "@example.test", name: "Unprepared owner", role: "user",
+    } });
     await fixture.identities.auth.api.createOrganization({ body: {
-      name: "Not prepared", slug: crypto.randomUUID(), userId: unpreparedOwner.loginId,
+      name: "Not prepared", slug: crypto.randomUUID(), userId: unpreparedOwner.id,
     } });
     const expected = prepared.sort((a, b) => b.placementId.localeCompare(a.placementId));
     const first = await readWorkspaceChoices(env.DB), next = await readWorkspaceChoices(env.DB, first.nextCursor ?? "");

@@ -1,5 +1,5 @@
 import { spawn, execFileSync, type ChildProcess } from "node:child_process";
-import { copyFile, lstat, mkdir, mkdtemp, readFile, readlink, realpath, rm, symlink, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { get } from "node:https";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
@@ -7,6 +7,7 @@ import { join } from "node:path";
 import { setTimeout } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { browserOrigins } from "./addresses";
+import { copyBrowserSources } from "./source-copy";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const children = new Set<ChildProcess>();
@@ -21,15 +22,7 @@ async function main(): Promise<void> {
   try {
     for (const port of [3000, 3001, 3002, 9230, 9231, 9232]) await ensureFreePort(port);
     await mkdir(work);
-    const names = execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard", "-z"], { cwd: root })
-      .toString().split("\0").filter(Boolean);
-    for (const name of new Set(names)) {
-      const source = join(root, name), target = join(work, name);
-      // Only source files selected by Git are copied; secret files and local data stay out.
-      await mkdir(join(target, ".."), { recursive: true });
-      if ((await lstat(source)).isSymbolicLink()) await symlink(await readlink(source), target);
-      else await copyFile(source, target);
-    }
+    await copyBrowserSources({ root, work });
     await mkdir(join(work, ".certs"));
     const caRoot = execFileSync("mkcert", ["-CAROOT"], { encoding: "utf8" }).trim();
     const ca = await readFile(join(caRoot, "rootCA.pem"));

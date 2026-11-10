@@ -1,7 +1,7 @@
 import { env } from "cloudflare:workers";
 import { createRequestContext } from "@xpro/core/server";
-import { beginMfaSignIn, createEnrolledMaster, createMfaFixture, currentMfaCode, mfaCookie, readMfaLogin,
-  type MfaFixture, type MfaSetup } from "#test/master-mfa";
+import { beginMfaSignIn, createEnrolledMaster, createMasterWithLastBackupCode, createMfaFixture, currentMfaCode, mfaCookie, readMfaLogin,
+  type EnrolledMaster, type MfaFixture, type MfaSetup } from "#test/master-mfa";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { handleMfaAction } from "#functions/mfa.server.ts";
 import type { HubAuthSettings } from "#auth/auth.server.ts";
@@ -124,29 +124,33 @@ describe("guarded MFA management", () => {
       .toEqual(["accounts_mfa_setup_started", "accounts_mfa_setup_restarted", "accounts_mfa_setup_started"]);
   });
 
-  it("Last backup code", async () => {
-    const login = await createEnrolledMaster(fixture);
-    let cookie = "";
-    for (const code of login.backupCodes) {
+  describe("the final native backup-code transition", () => {
+    let login: EnrolledMaster;
+    beforeEach(async () => { login = await createMasterWithLastBackupCode(fixture); });
+
+    it("Last backup code", async () => {
+      const code = login.backupCodes.at(-1);
+      if (!code) throw new Error("The native fixture has no final backup code.");
       const pending = await beginMfaSignIn(fixture, login.email);
-      const verified = await fixture.auth.api.verifyBackupCode({ headers: { cookie: mfaCookie(pending) }, body: { code }, asResponse: true });
-      expect(verified.status).toBe(200); cookie = mfaCookie(verified);
-    }
-    expect((await fixture.auth.api.viewBackupCodes({ body: { userId: login.loginId } })).backupCodes).toEqual([]);
-    const replacement = await call({ action: "replace", cookie });
-    expect(replacement.status).toBe(200);
-    expect((await replacement.json() as MfaSetup).backupCodes).toHaveLength(10);
-    const pendingCookie = mfaCookie(replacement);
-    const pendingSession = await fixture.auth.api.getSession({ headers: { cookie: pendingCookie } });
-    if (!pendingSession) throw new Error("Missing actual replacement enrollment session.");
-    expect(await env.HUB_ACCESS.validateAccess({ loginId: login.loginId, hubSessionId: pendingSession.session.id,
-      workspaceId: null, context: createRequestContext() })).toEqual({ status: "invalid", code: "core_unauthenticated" });
-    const verified = await fixture.auth.api.verifyTOTP({ headers: { cookie: pendingCookie },
-      body: { code: await currentMfaCode(fixture, login.loginId) }, asResponse: true });
-    expect(verified.status).toBe(200);
-    const restored = await readMfaLogin(fixture, { login, response: verified });
-    expect(await env.HUB_ACCESS.validateAccess({ loginId: restored.loginId, hubSessionId: restored.hubSessionId,
-      workspaceId: null, context: createRequestContext() })).toMatchObject({ status: "valid", mfa: { status: "verified" } });
+      const proof = await fixture.auth.api.verifyBackupCode({ headers: { cookie: mfaCookie(pending) }, body: { code }, asResponse: true });
+      expect(proof.status).toBe(200);
+      const cookie = mfaCookie(proof);
+      expect((await fixture.auth.api.viewBackupCodes({ body: { userId: login.loginId } })).backupCodes).toEqual([]);
+      const replacement = await call({ action: "replace", cookie });
+      expect(replacement.status).toBe(200);
+      expect((await replacement.json() as MfaSetup).backupCodes).toHaveLength(10);
+      const pendingCookie = mfaCookie(replacement);
+      const pendingSession = await fixture.auth.api.getSession({ headers: { cookie: pendingCookie } });
+      if (!pendingSession) throw new Error("Missing actual replacement enrollment session.");
+      expect(await env.HUB_ACCESS.validateAccess({ loginId: login.loginId, hubSessionId: pendingSession.session.id,
+        workspaceId: null, context: createRequestContext() })).toEqual({ status: "invalid", code: "core_unauthenticated" });
+      const verified = await fixture.auth.api.verifyTOTP({ headers: { cookie: pendingCookie },
+        body: { code: await currentMfaCode(fixture, login.loginId) }, asResponse: true });
+      expect(verified.status).toBe(200);
+      const restored = await readMfaLogin(fixture, { login, response: verified });
+      expect(await env.HUB_ACCESS.validateAccess({ loginId: restored.loginId, hubSessionId: restored.hubSessionId,
+        workspaceId: null, context: createRequestContext() })).toMatchObject({ status: "valid", mfa: { status: "verified" } });
+    });
   });
 
   it("when a submission is rate limited then it returns a safe refusal without changing MFA state", async () => {

@@ -1,4 +1,5 @@
 import { test, expect, type APIResponse, type BrowserContext, type Locator, type Page, type Route } from "@playwright/test";
+import type { ConsoleMessage, Request, Response } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
@@ -331,34 +332,52 @@ test("Private authentication material", async ({ page, context }) => {
   const login = getLogin("mfaPrivacy"), privateValues = [password], navigation: string[] = [], diagnostics: string[] = [];
   const requests: { url: string; body: string; isPasswordSubmission: boolean; isCodeSubmission: boolean }[] = [];
   const responses: { body: string; isPrivateReply: boolean; headers: string }[] = [], pending: Promise<void>[] = [];
-  let hasReadFailure = false;
-  const observeRequest = (request: import("@playwright/test").Request): void => {
+  const readFailures: string[] = [], authRequests: Request[] = [], capturedAuthRequests = new Set<Request>();
+  const isAuthResponse = (url: URL): boolean => url.origin === origin && (url.pathname.startsWith("/api/auth/") || url.pathname.startsWith("/_serverFn/"));
+  async function captureAuthResponse(route: Route): Promise<void> {
+    const request = route.request();
+    if (request.isNavigationRequest()) { await route.fallback(); return; }
+    const response = await forwardMfa(route), headers = response.headers();
+    if (/json|html/.test(headers["content-type"] ?? "")) responses.push({ body: await response.text(), headers: JSON.stringify(headers),
+      isPrivateReply: request.method() === "POST" && new URL(request.url()).pathname.startsWith("/_serverFn/") && Boolean(request.postData()?.includes('"password"')) });
+    capturedAuthRequests.add(request);
+    await route.fulfill({ response });
+  }
+  async function drainCaptures(): Promise<void> {
+    // Include captures queued while earlier reads settle.
+    for (const capture of pending) await capture;
+  }
+  const observeRequest = (request: Request): void => {
     const url = new URL(request.url()), body = request.postData() ?? "";
+    if (isAuthResponse(url) && !request.isNavigationRequest()) authRequests.push(request);
     navigation.push(request.url());
     requests.push({ url: request.url(), body, isPasswordSubmission: request.method() === "POST" && url.origin === origin
       && (url.pathname === "/api/auth/sign-in/email" || url.pathname.startsWith("/_serverFn/")),
       isCodeSubmission: request.method() === "POST" && url.origin === origin && url.pathname.startsWith("/api/auth/two-factor/verify-") });
   };
-  const observeResponse = (response: import("@playwright/test").Response): void => {
-    if (new URL(response.url()).origin !== origin || !response.request().isNavigationRequest() && !response.url().includes("/api/auth/") && !response.url().includes("/_serverFn/")) return;
+  const observeResponse = (response: Response): void => {
+    if (new URL(response.url()).origin !== origin || !response.request().isNavigationRequest()) return;
     pending.push((async () => {
+      let stage = "response-headers";
       try {
         const headers = await response.allHeaders();
         if (!/json|html/.test(headers["content-type"] ?? "")) return;
+        stage = "response-body";
         responses.push({ body: await response.text(), headers: JSON.stringify(headers), isPrivateReply: response.request().method() === "POST"
           && new URL(response.url()).pathname.startsWith("/_serverFn/") && Boolean(response.request().postData()?.includes('"password"')) });
-      } catch { hasReadFailure = true; }
+      } catch { readFailures.push(stage); }
     })());
   };
-  const observeConsole = (message: import("@playwright/test").ConsoleMessage): void => {
+  const observeConsole = (message: ConsoleMessage): void => {
     pending.push((async () => { diagnostics.push(message.text()); for (const value of message.args()) diagnostics.push(JSON.stringify(await value.jsonValue()) ?? "undefined"); })()
-      .catch(() => { hasReadFailure = true; }));
+      .catch(() => { readFailures.push("console-argument"); }));
   };
   context.on("request", observeRequest); context.on("response", observeResponse); context.on("console", observeConsole);
   try {
+    await page.route(isAuthResponse, captureAuthResponse);
     await context.grantPermissions(["clipboard-read", "clipboard-write"], { origin });
     await signIn(page, login); await beginSetup(page);
-    await Promise.all(pending);
+    await drainCaptures();
     const setupReply = responses.find((response) => response.isPrivateReply);
     if (!setupReply) throw new Error("Missing native setup reply.");
     const material: { totpURI?: unknown } = JSON.parse(setupReply.body);
@@ -375,12 +394,15 @@ test("Private authentication material", async ({ page, context }) => {
     await page.locator("#mfa-backup-codes").focus(); await page.keyboard.press("ControlOrMeta+A"); await page.keyboard.press("ControlOrMeta+C");
     expect(await page.evaluate(async (expected) => await navigator.clipboard.readText() === expected, codes)).toBe(true);
     expect(await page.locator("#mfa-backup-codes").inputValue() === codes).toBe(true); await accessible(page);
-    await page.getByRole("button", { name: "Continue", exact: true }).click(); await expect(page).toHaveURL(origin + "/stms/logins"); await page.goto("/profile");
+    await drainCaptures();
+    await page.getByRole("button", { name: "Continue", exact: true }).click(); await expect(page).toHaveURL(origin + "/stms/logins");
+    await page.waitForLoadState("load"); await drainCaptures();
+    await page.goto("/profile");
     await generateFromProfile(page); await expect(page.locator("#mfa-backup-codes")).toBeVisible(); privateValues.push(...(await page.locator("#mfa-backup-codes").inputValue()).split("\n"));
     await page.getByRole("button", { name: "Done", exact: true }).click();
     const stored = await page.evaluate(() => JSON.stringify([Object.entries(localStorage), Object.entries(sessionStorage)]));
     const audits = await withBrowserHub(async ({ db }) => JSON.stringify(await db.selectFrom("auditEntries").selectAll().execute()));
-    context.off("request", observeRequest); context.off("response", observeResponse); context.off("console", observeConsole); await Promise.all(pending);
+    context.off("request", observeRequest); context.off("response", observeResponse); context.off("console", observeConsole); await drainCaptures();
     const otp = new RegExp("(^|[^A-Za-z0-9])" + code + "([^A-Za-z0-9]|$)");
     const hasCredentials = (text: string): boolean => text.includes(password) || text.includes(encodeURIComponent(password)) || otp.test(text);
     const hasMaterial = (text: string): boolean => privateValues.filter((value) => value !== password).some((value) => text.includes(value) || text.includes(encodeURIComponent(value)));
@@ -397,14 +419,17 @@ test("Private authentication material", async ({ page, context }) => {
       const publicFields = Object.fromEntries(Object.entries(body).filter(([key]) => key !== "backupCodes" && key !== "totpURI"));
       return hasMaterial(JSON.stringify(publicFields));
     });
-    expect({ readsFailed: hasReadFailure, urls: navigation.some(hasSecret), console: diagnostics.some(hasSecret), storage: hasSecret(stored), audits: hasSecret(audits),
+    expect({ readFailures, capturesComplete: authRequests.every((request) => capturedAuthRequests.has(request)), urls: navigation.some(hasSecret), console: diagnostics.some(hasSecret), storage: hasSecret(stored), audits: hasSecret(audits),
       requestBodies: hasRequestLeak, responseHeaders: responses.some((response) => hasSecret(response.headers)), responseBodies: hasResponseLeak })
-      .toEqual({ readsFailed: false, urls: false, console: false, storage: false, audits: false, requestBodies: false, responseHeaders: false, responseBodies: false });
+      .toEqual({ readFailures: [], capturesComplete: true, urls: false, console: false, storage: false, audits: false, requestBodies: false, responseHeaders: false, responseBodies: false });
     expect([...new Set(requests.map((request) => new URL(request.url).origin).filter((value) => value !== origin))]).toEqual(["https://challenges.cloudflare.com"]);
     const privateReplies = responses.filter((response) => response.isPrivateReply); expect(privateReplies).toHaveLength(2);
     expect(privateReplies.every((response) => /no-store/.test(JSON.parse(response.headers)["cache-control"] ?? ""))).toBe(true);
     expect(privateValues.length).toBe(23); expect(code).toMatch(/^\d{6}$/);
-  } finally { context.off("request", observeRequest); context.off("response", observeResponse); context.off("console", observeConsole); await Promise.all(pending); }
+  } finally {
+    await page.unroute(isAuthResponse, captureAuthResponse);
+    context.off("request", observeRequest); context.off("response", observeResponse); context.off("console", observeConsole); await drainCaptures();
+  }
 });
 
 test("when a signed workspace request is changed during MFA then verification issues no callback or workspace access", async ({ page }) => {
@@ -616,7 +641,7 @@ async function checkLayout(page: Page): Promise<void> {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true); await accessible(page);
 }
 async function forwardMfa(route: Route): Promise<APIResponse> {
-  return await route.fetch({ url: route.request().url().replace(origin, "https://127.0.0.1:3001"), headers: { ...await route.request().allHeaders(), host: "hub.localhost:3001" } });
+  return await route.fetch({ url: route.request().url().replace(origin, "https://127.0.0.1:3001"), headers: { ...await route.request().allHeaders(), host: "hub.localhost:3001" }, maxRedirects: 0 });
 }
 
 async function freshMaster(page: Page, login: Login): Promise<void> {

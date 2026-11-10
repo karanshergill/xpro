@@ -6,7 +6,7 @@ import { createHubAuth, type HubAuthSettings } from "./auth.server";
 import { readLoginByIdentifier, recordSignIn } from "./sign-in.db";
 import { canAttemptSignIn, type SignInProtectionSettings } from "./sign-in-protection.server";
 import { handleMfaVerification } from "#auth/mfa/http.server.ts";
-import { validateHubLocalAccess } from "./validate-access.server";
+import { validateHubLocalAccess } from "@xpro/accounts/server";
 
 export type HubRequestSettings = HubAuthSettings & SignInProtectionSettings;
 

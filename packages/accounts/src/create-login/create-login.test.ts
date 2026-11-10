@@ -535,6 +535,7 @@ async function expectComplete(response: Response, input: {
   const audits = after.hub.audits.filter((row) => row.action === "accounts_login_created" && row.affectedLoginId === subject.id);
   expect(audits).toEqual([{ id: expect.any(String), action: "accounts_login_created", outcome: "success",
     actorLoginId: creator.loginId, affectedLoginId: subject.id, reason: null, comment: null,
+    accountId: null, workspaceId: null, details: null,
     requestId: expect.any(String), createdAt: expect.any(String) }]);
   expect(audits[0]?.requestId).not.toBe(submitted.creationId);
   await expectUnrelated(before, { input: submitted, loginId: subject.id });

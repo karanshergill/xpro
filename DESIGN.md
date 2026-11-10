@@ -116,6 +116,8 @@ for other interactive elements.
 - **Actions:** use the shared [Button](packages/ui/src/button.tsx): its default
   variant is filled and its outline variant is secondary. Navigation uses
   anchors, with shared button variants where appropriate.
+  Button foreground and surface colours change together without interpolation,
+  avoiding low-contrast intermediate frames when the action variant changes.
 - **Forms:** follow the existing [fields](apps/hub/src/components/ui/field.tsx)
   and [inputs](apps/hub/src/components/ui/input.tsx). Keep visible labels,
   descriptions and field errors. Validate on blur or submit; focus the first

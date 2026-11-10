@@ -8,6 +8,8 @@ database and screens. Add a term here before using it.
   workspace per account for now; several come later.
 - **Account holder:** the person behind an account, who manages it from
   their account page in the Hub.
+  A login holds at most one account for now. A master may transfer this
+  responsibility without changing the account's identity.
 - **Authenticator app:** an app that generates changing verification codes for
   sign-in from a saved secret.
 - **Backup code:** a saved, single-use verification code used in place of an
@@ -50,10 +52,15 @@ database and screens. Add a term here before using it.
   and control access. Teams can contain other teams.
 - **Workspace:** one separate business space owned by an account, with
   its own data, users, modules and subscription.
+- **Workspace creation:** the recorded intent and progress for creating one
+  account's workspace. It keeps a stable workspace identity so an authorised
+  master can resume interrupted setup without creating another workspace.
 - **Workspace owner:** the top-level user for managing a workspace's
   members, using the Organization plugin's `owner` role in the Hub.
   Initially the Account holder has this role. It does not grant
   xpro-wide master access.
+  After workspace setup completes, workspace ownership and account-holder
+  responsibility can be transferred separately.
 - **Workspace user:** a person inside a workspace, internal or external.
   Their local record keeps workspace details and history but does not
   grant access by itself. One login belongs to at most one workspace

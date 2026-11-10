@@ -257,12 +257,13 @@ fixture was substituted. Storage-only factor fixtures are explicitly unverified.
 The focused command ran in the isolated copy with the real Workers runtime,
 native authentication, application migrations and database. Plain policy tests
 exercise fact values; they do not create verified sessions or substitute native
-verification:
+verification. The command below uses the current Accounts test locations; the
+recorded results are the pre-relocation checkpoint, not a new run:
 
 ```bash
 bun run test packages/core/src/access \
-  apps/hub/src/auth/{hub-access,validate-access.db,mfa-access,access-policy}.test.ts \
-  apps/hub/src/auth/mfa/access.test.ts \
+  apps/hub/src/auth/{hub-access,mfa-access,access-policy}.test.ts \
+  packages/accounts/src/access/{validate-access.db,mfa-access}.test.ts \
   packages/core/src/dates/dates.test.ts packages/core/src/server/errors.test.ts
 ```
 
@@ -345,10 +346,13 @@ interrupted phase commits and rollback. Token cases issue real provider access
 tokens and preserve an unrelated login's tokens. The configured grant issues no
 refresh tokens; the indexed refresh-revocation statement is covered by query plans.
 
+The command uses current test locations; the results below record the original
+pre-relocation checkpoint, not a new run.
+
 ```bash
 bun run test apps/hub/src/auth/mfa packages/core/src/access \
   apps/hub/src/auth/hub-access.test.ts apps/hub/src/auth/mfa-access.test.ts \
-  apps/hub/src/auth/validate-access.db.test.ts
+  packages/accounts/src/access/{validate-access.db,mfa-access}.test.ts
 ```
 
 | Check run in the isolated candidate | Final result |
@@ -542,7 +546,7 @@ screen/browser assertions passed.
 | Workspace sign-in continuation | `mfa/oauth.test.ts` covers credentials, MFA, profile completion and signed continuation, plus tamper/code-order cases | The complete browser journey reaches only the intended workspace; tampering cannot continue. |
 | Single-use backup sign-in | `mfa/sign-in.test.ts`, `mfa/concurrency.test.ts`; consumed-proof failure in `mfa/interruption.test.ts` | Backup entry completes sign-in once and clears sensitive submitted fields. |
 | Last backup code | `mfa/management.test.ts` exhausts the set, starts replacement without another code and verifies the new factor | Complete recovery and copy/download the new set without requiring a second old code. |
-| Current password and recent MFA | `mfa/management.test.ts`, `mfa/concurrency.test.ts`, `mfa/access.test.ts`; Core access-policy tests | Separate-tab re-verification and Check access preserve drafts; stale/changed identity cannot save. |
+| Current password and recent MFA | `mfa/management.test.ts`, `mfa/concurrency.test.ts`, `packages/accounts/src/access/mfa-access.test.ts`; Core access-policy tests | Separate-tab re-verification and Check access preserve drafts; stale/changed identity cannot save. |
 | Authenticator replacement | `mfa/management.test.ts`, `mfa/token-revocation.test.ts`, `mfa/interruption.test.ts` | Warn about invalidation; display new material and keep access limited until verification. |
 | New backup-code set | `mfa/management.test.ts`, `mfa/concurrency.test.ts`, `mfa/interruption.test.ts` | Warn, display only the winning new set and provide explicit copy/download. |
 | Interrupted replacement | `mfa/interruption.test.ts` covers lost commits, insertion refusal and actual resume/restart | Unknown-result and refresh recovery show no false success or automatic replay. |

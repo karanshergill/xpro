@@ -76,7 +76,7 @@
   await the real factory. Record any MFA integration tests that await the next
   actions honestly; do not manufacture verified sessions to make fixtures green.
 
-- [x] T048 [US1, US3] Enforce the live MFA contract in `apps/hub/src/auth/validate-access.db.ts`, `validate-access.server.ts`, `hub-access.server.ts`, `packages/core/src/access/` and the shared safe-error definitions.
+- [x] T048 [US1, US3] Enforce the live MFA contract in `packages/accounts/src/access/validate-access.db.ts`, `packages/accounts/src/access/validate-access.server.ts`, `packages/accounts/src/access/mfa-access.ts`, `apps/hub/src/auth/hub-access.server.ts`, `packages/core/src/access/` and the shared safe-error definitions.
 
 - **Access:** add current role, revision and MFA facts to the existing indexed
   read. Implement the Hub-local limited state/actions, exact five-minute boundary

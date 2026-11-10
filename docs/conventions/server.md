@@ -15,6 +15,9 @@ and Durable Objects.
   TanStack Start never lets into the browser bundle.
 - **Thin server functions:** a server function checks its input and calls
   code in `.server.ts` files. It holds no business rules itself.
+- **Standalone Hub server functions:** keep modules in the SSR import graph,
+  beside the existing function imports in `apps/hub/src/router.tsx`. Dev-only
+  lazy resolution does not prove the production resolver exposes the function.
 - **Two checks:** every input is checked where it enters the app, and the
   business rules check it again before saving. A bug that slips past the
   first check is caught by the second.
@@ -113,6 +116,13 @@ References: [Valibot parsing](https://valibot.dev/api/safeParse/),
   automatically. Repeated lifecycle transitions conflict; unchanged normalized
   identifiers are no-ops. A lost reply may follow a committed atomic change.
   Read current state before a fresh submission; see ADR-027.
+- **Account/workspace management submissions:** use a stable `operationId`,
+  separate from diagnostic request IDs. The retained immutable audit entry holds
+  the normalized command fingerprint and minimal receipt. Replays and read-only
+  recovery require current native master authority; never retry writes automatically.
+  Re-read the recorded result after a preparation refusal too: another same-key
+  invocation may have committed after the initial absent-key snapshot.
+  A not-recorded lookup does not prove an in-flight write cannot later commit.
 - **Time limits:** every call to an outside service has a time limit and
   a planned response when it fails, so a slow service never stalls the
   app.
